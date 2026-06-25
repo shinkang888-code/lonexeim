@@ -9,5 +9,6 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     database: !!process.env.DATABASE_URL,
     ai: !!process.env.HF_TOKEN,
+    kaggle: !!process.env.KAGGLE_API_TOKEN,
   });
 }
