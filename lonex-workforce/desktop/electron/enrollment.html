@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LONEX Workforce — 등록</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e5e5e5;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.06);
+    }
+    h1 { font-size: 1.25rem; text-align: center; letter-spacing: .15em; margin-bottom: 8px; }
+    p.sub { text-align: center; font-size: .8rem; color: #666; margin-bottom: 24px; }
+    label { display: block; font-size: .75rem; color: #555; margin-bottom: 4px; margin-top: 12px; }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: .875rem;
+    }
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 12px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: .9rem;
+      cursor: pointer;
+    }
+    button:hover { background: #333; }
+    .err { color: #c00; font-size: .75rem; margin-top: 8px; display: none; }
+    .note { font-size: .7rem; color: #888; margin-top: 16px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>LONEX</h1>
+    <p class="sub">직원 PC 등록 — 본사 API Key 입력</p>
+    <form id="form">
+      <label for="hq">본사 서버 URL</label>
+      <input id="hq" name="hq" value="https://lonex-hub.vercel.app" required />
+      <label for="key">API Key (lnx_sk_…)</label>
+      <input id="key" name="key" placeholder="본사에서 발급받은 키" required autocomplete="off" />
+      <label for="emp">직원 ID (선택)</label>
+      <input id="emp" name="emp" placeholder="EMP-XXXXXXXX" />
+      <p class="err" id="err"></p>
+      <button type="submit">등록하고 Hub 시작</button>
+    </form>
+    <p class="note">
+      본사 관리자가 직원 등록 후 API Key를 발급합니다.
+      등록된 PC의 이메일·문서·보안 이벤트는 본사 서버에 업로드되며 일괄 검색됩니다.
+    </p>
+  </div>
+  <script>
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = document.getElementById('err');
+      err.style.display = 'none';
+      const payload = {
+        hqServerUrl: document.getElementById('hq').value.trim(),
+        apiKey: document.getElementById('key').value.trim(),
+        employeeId: document.getElementById('emp').value.trim(),
+      };
+      if (!payload.apiKey.startsWith('lnx_sk_')) {
+        err.textContent = 'API Key 형식이 올바르지 않습니다 (lnx_sk_ 로 시작)';
+        err.style.display = 'block';
+        return;
+      }
+      const res = await window.lonexWorkforce.saveEnrollment(payload);
+      if (!res.ok) {
+        err.textContent = res.error || '등록 실패';
+        err.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

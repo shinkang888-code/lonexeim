@@ -1,0 +1,53 @@
+# Lonex Hub — 추천 OSS 백엔드 스택 (로컬 개발용)
+# 사용: docker compose -f docker-compose.oss.yml up -d
+
+services:
+  dify-api:
+    image: langgenius/dify-api:latest
+    profiles: [ai]
+    ports: ["5001:5001"]
+
+  rocketchat:
+    image: rocket.chat:latest
+    profiles: [chat]
+    ports: ["3000:3000"]
+
+  roundcube:
+    image: roundcube/roundcubemail:latest
+    profiles: [mail]
+    ports: ["8080:80"]
+
+  calcom:
+    image: calcom/cal.com:latest
+    profiles: [calendar]
+    ports: ["3001:3000"]
+
+  mediacms:
+    image: mediacms/mediacms:latest
+    profiles: [cdms]
+    ports: ["8081:80"]
+
+  livekit:
+    image: livekit/livekit-server:latest
+    profiles: [video]
+    ports: ["7880:7880"]
+
+  nextcloud:
+    image: nextcloud:latest
+    profiles: [drive]
+    ports: ["8082:80"]
+
+  outline:
+    image: outlinewiki/outline:latest
+    profiles: [notes]
+    ports: ["3002:3000"]
+
+  chatwoot:
+    image: chatwoot/chatwoot:latest
+    profiles: [support]
+    ports: ["3003:3000"]
+
+  akaunting:
+    image: akaunting/akaunting:latest
+    profiles: [billing]
+    ports: ["8083:80"]

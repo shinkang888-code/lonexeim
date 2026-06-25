@@ -1,0 +1,34 @@
+{
+  "name": "lonex-workforce-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lonex 직원용 데스크탑 — Hub UI + LogShield + 본사 동기화",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "pack": "electron-builder --dir"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "kr.lonex.workforce",
+    "productName": "LONEX Workforce",
+    "directories": { "output": "dist" },
+    "win": {
+      "target": ["nsis"],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "runAfterFinish": true
+    }
+  }
+}

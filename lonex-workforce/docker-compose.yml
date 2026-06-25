@@ -1,0 +1,19 @@
+services:
+  hq-server:
+    build: ./hq-server
+    ports:
+      - "8080:8080"
+    environment:
+      LONEX_HQ_ADMIN_SECRET: lonex-hq-admin-dev-secret
+      LONEX_HQ_KEY_PEPPER: lonex-pepper-dev
+    volumes:
+      - hq-data:/app/data
+
+  logshield-backend:
+    build: ../logshield/backend
+    profiles: [logshield]
+    ports:
+      - "8000:8000"
+
+volumes:
+  hq-data:
