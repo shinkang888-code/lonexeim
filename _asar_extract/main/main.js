@@ -5,12 +5,15 @@ const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 const { registerLicenseIpc, ensureLicensedStartup } = require('./license/licenseManager');
+const { replaceLegacyGrendPaths } = require('./lib/path-alias');
 
 registerLicenseIpc(ipcMain, 'CDMS');
 
 // ── Config ──
 const APP_NAME = 'LONEX CDMS';
-const API_HOST = process.env.NODE_ENV === 'development' ? 'dx.lonex.kr' : 'x.lonex.kr';
+const API_HOST = replaceLegacyGrendPaths(
+  process.env.LONEX_API_HOST || (process.env.NODE_ENV === 'development' ? 'dx.lonex.kr' : 'x.lonex.kr')
+);
 const API_ORIGIN = `https://${API_HOST}`;
 const LOCAL_PORT = 14837; // 로컬 서버 포트 (충돌 가능성 낮은 번호)
 const STATIC_DIR = path.join(__dirname, 'app'); // Vite build 결과물

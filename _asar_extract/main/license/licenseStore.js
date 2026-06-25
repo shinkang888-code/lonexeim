@@ -10,6 +10,23 @@ function licenseFilePath() {
   return path.join(app.getPath('userData'), 'lonex-license.dat');
 }
 
+function legacyLicenseFilePath() {
+  return path.join(app.getPath('userData'), 'grend-license.dat');
+}
+
+function migrateLegacyLicenseFile() {
+  const current = licenseFilePath();
+  const legacy = legacyLicenseFilePath();
+  if (!fs.existsSync(current) && fs.existsSync(legacy)) {
+    try {
+      fs.copyFileSync(legacy, current);
+      console.log('[License] Migrated grend-license.dat → lonex-license.dat');
+    } catch (err) {
+      console.warn('[License] Legacy license migration failed:', err.message);
+    }
+  }
+}
+
 function encrypt(text) {
   if (safeStorage.isEncryptionAvailable()) {
     return { v: 2, data: safeStorage.encryptString(text).toString('base64') };
@@ -26,6 +43,7 @@ function decrypt(record) {
 }
 
 function loadLicenseRecord() {
+  migrateLegacyLicenseFile();
   const file = licenseFilePath();
   if (!fs.existsSync(file)) return null;
   try {

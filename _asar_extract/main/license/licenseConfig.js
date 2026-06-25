@@ -1,5 +1,7 @@
 'use strict';
 
+const { replaceLegacyGrendPaths } = require('../lib/path-alias');
+
 const PRODUCT = {
   CDMS: {
     code: 'LONEX-CDMS',
@@ -38,7 +40,7 @@ function licenseArtifactTtlSec() {
 }
 
 function licenseApiOrigin() {
-  const host = process.env.LONEX_API_HOST || 'x.lonex.kr';
+  const host = replaceLegacyGrendPaths(process.env.LONEX_API_HOST || 'x.lonex.kr');
   return `https://${host}`;
 }
 

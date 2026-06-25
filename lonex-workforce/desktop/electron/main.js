@@ -1,8 +1,10 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const Store = require('electron-store');
 const { SyncClient } = require('./sync-client');
 const { LogshieldBridge } = require('./logshield-bridge');
+const { replaceLegacyGrendPaths } = require('./path-alias');
 
 const store = new Store({ name: 'lonex-workforce-config' });
 const isDev = process.argv.includes('--dev');
@@ -12,11 +14,30 @@ let tray = null;
 let syncClient = null;
 let logshieldBridge = null;
 
-const HUB_URL = process.env.LONEX_HUB_URL || (isDev ? 'http://localhost:3000' : 'https://lonex-hub.vercel.app');
+const HUB_URL = replaceLegacyGrendPaths(
+  process.env.LONEX_HUB_URL || (isDev ? 'http://localhost:3000' : 'https://lonex-hub.vercel.app')
+);
+
+function migrateLegacyGrendStore() {
+  try {
+    const userData = app.getPath('userData');
+    const oldPath = path.join(userData, 'grend-workforce-config.json');
+    if (!fs.existsSync(oldPath) || store.get('_migratedFromGrend')) return;
+    const old = JSON.parse(fs.readFileSync(oldPath, 'utf8'));
+    for (const [key, value] of Object.entries(old)) {
+      if (store.has(key)) continue;
+      store.set(key, typeof value === 'string' ? replaceLegacyGrendPaths(value) : value);
+    }
+    store.set('_migratedFromGrend', true);
+    console.log('[Workforce] Migrated grend-workforce-config.json → lonex-workforce-config');
+  } catch (err) {
+    console.warn('[Workforce] Legacy store migration skipped:', err.message);
+  }
+}
 
 function getConfig() {
   return {
-    hqServerUrl: store.get('hqServerUrl', 'https://lonex-hub.vercel.app'),
+    hqServerUrl: replaceLegacyGrendPaths(store.get('hqServerUrl', 'https://lonex-hub.vercel.app')),
     apiKey: store.get('apiKey', ''),
     employeeId: store.get('employeeId', ''),
     endpointId: store.get('endpointId', ''),
@@ -82,6 +103,7 @@ function startServices() {
 }
 
 app.whenReady().then(() => {
+  migrateLegacyGrendStore();
   createWindow();
   createTray();
   startServices();
@@ -150,7 +172,8 @@ ipcMain.handle('workforce:saveEnrollment', async (_e, payload) => {
     return { ok: false, error: err.message || 'API Key 검증 실패' };
   }
 
-  store.set('hqServerUrl', hqUrl);
+  store.set('hqServerUrl', replaceLegacyGrendPaths(hqUrl));
+  store.set('apiKey', apiKey);
   store.set('employeeId', payload.employeeId || '');
   store.set('endpointId', payload.endpointId || `EP-${require('os').hostname()}`);
   store.set('endpointHostname', require('os').hostname());

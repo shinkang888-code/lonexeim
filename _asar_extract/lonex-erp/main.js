@@ -2,11 +2,12 @@ const { app, BrowserWindow, Menu, shell, session, nativeImage, Tray, Notificatio
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
 const { registerLicenseIpc, ensureLicensedStartup } = require('./license/licenseManager');
+const { replaceLegacyGrendPaths } = require('./lib/path-alias');
 
 registerLicenseIpc(ipcMain, 'ERP');
 
 // ── Config ──
-const APP_URL = 'https://x.lonex.kr';
+const APP_URL = replaceLegacyGrendPaths(process.env.LONEX_APP_URL || 'https://x.lonex.kr');
 const APP_NAME = 'LONEX';
 
 let mainWindow = null;
