@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ModulePageHeader, OssBadge } from "@/components/hub/ModuleChrome";
 import { syncToHq } from "@/lib/workforce-sync";
 
@@ -16,7 +16,15 @@ export default function AiAssistantModule() {
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<"chat" | "legal" | "pii">("chat");
   const [loading, setLoading] = useState(false);
+  const [aiReady, setAiReady] = useState<boolean | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/ai/status")
+      .then((r) => r.json())
+      .then((d) => setAiReady(!!d.configured))
+      .catch(() => setAiReady(false));
+  }, []);
 
   async function send() {
     if (!input.trim() || loading) return;
@@ -71,6 +79,14 @@ export default function AiAssistantModule() {
       <ModulePageHeader
         title="AI 비서"
         action={
+          <span className="rounded-lg border px-2 py-1 text-xs">
+            {aiReady === null ? "…" : aiReady ? "HF 연동" : "데모 모드"}
+          </span>
+        }
+      />
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col p-4">
+        <OssBadge moduleId="ai-assistant" />
+        <div className="mb-3 flex gap-2">
           <select
             value={mode}
             onChange={(e) => setMode(e.target.value as typeof mode)}
@@ -80,10 +96,7 @@ export default function AiAssistantModule() {
             <option value="legal">법률 (Qwen Legal)</option>
             <option value="pii">PII 마스킹</option>
           </select>
-        }
-      />
-      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col p-4">
-        <OssBadge moduleId="ai-assistant" />
+        </div>
         <div className="mb-4 flex-1 space-y-3 overflow-y-auto rounded-xl border bg-white p-4" style={{ minHeight: 360 }}>
           {messages.map((m, i) => (
             <div

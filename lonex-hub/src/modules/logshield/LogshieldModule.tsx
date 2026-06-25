@@ -4,6 +4,17 @@ import { useEffect, useState } from "react";
 import { ModulePageHeader, OssBadge } from "@/components/hub/ModuleChrome";
 import { isWorkforceDesktop } from "@/lib/workforce-sync";
 
+const CONSOLE =
+  process.env.NEXT_PUBLIC_LOGSHIELD_CONSOLE_URL || "https://logshield-phi.vercel.app";
+
+const TABS = [
+  { id: "events", label: "이벤트", embed: false },
+  { id: "console", label: "대시보드", embed: "/" },
+  { id: "endpoints", label: "엔드포인트", embed: "/endpoints" },
+  { id: "usb", label: "USB", embed: "/usb" },
+  { id: "ueba", label: "UEBA", embed: "/ueba" },
+] as const;
+
 type SecEvent = {
   id: number;
   event_type: string;
@@ -15,7 +26,7 @@ type SecEvent = {
 };
 
 export default function LogshieldModule() {
-  const [tab, setTab] = useState("events");
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("console");
   const [desktop, setDesktop] = useState(false);
   const [events, setEvents] = useState<SecEvent[]>([]);
 
@@ -26,8 +37,10 @@ export default function LogshieldModule() {
       .then((d) => setEvents(d.data ?? []));
   }, []);
 
+  const current = TABS.find((t) => t.id === tab)!;
+
   return (
-    <div className="min-h-screen bg-[#0f1419] pb-28 text-neutral-100">
+    <div className="flex min-h-screen flex-col bg-[#0f1419] pb-28 text-neutral-100">
       <ModulePageHeader
         title="LogShield 보안관제"
         action={
@@ -36,54 +49,46 @@ export default function LogshieldModule() {
           </span>
         }
       />
-      <div className="mx-auto max-w-4xl p-4">
+      <div className="flex flex-1 flex-col p-4">
         <OssBadge moduleId="logshield" />
-        <div className="mb-4 flex gap-2">
-          {["events", "endpoints", "usb", "ueba"].map((t) => (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {TABS.map((t) => (
             <button
-              key={t}
+              key={t.id}
               type="button"
-              onClick={() => setTab(t)}
-              className={`rounded-lg px-3 py-1.5 text-xs capitalize ${
-                tab === t ? "bg-emerald-600 text-white" : "bg-neutral-800 text-neutral-400"
+              onClick={() => setTab(t.id)}
+              className={`rounded-lg px-3 py-1.5 text-xs ${
+                tab === t.id ? "bg-emerald-600 text-white" : "bg-neutral-800 text-neutral-400"
               }`}
             >
-              {t}
+              {t.label}
             </button>
           ))}
         </div>
 
-        {tab === "events" && (
+        {tab === "events" ? (
           <div className="space-y-2">
             {events.length === 0 ? (
-              <p className="text-sm text-neutral-500">보안 이벤트 없음 — LogShield Agent 연동 대기</p>
+              <p className="text-sm text-neutral-500">HQ 보안 이벤트 없음 — Agent → Desktop → Hub 업로드 대기</p>
             ) : (
               events.map((ev) => (
                 <article key={ev.id} className="rounded-xl border border-neutral-700 bg-neutral-900 p-3 text-sm">
                   <div className="flex justify-between">
                     <span className="font-medium">{ev.event_type}</span>
-                    <span
-                      className={`text-xs ${
-                        ev.severity === "critical" ? "text-red-400" : "text-amber-400"
-                      }`}
-                    >
-                      {ev.severity}
-                    </span>
+                    <span className="text-xs text-amber-400">{ev.severity}</span>
                   </div>
                   <p className="text-neutral-400">{ev.detail}</p>
-                  <p className="mt-1 text-[10px] text-neutral-600">
-                    {ev.employee_name ?? "—"} · {String(ev.created_at).slice(0, 19)}
-                  </p>
                 </article>
               ))
             )}
           </div>
-        )}
-
-        {tab !== "events" && (
-          <div className="rounded-xl border border-dashed border-neutral-600 p-8 text-center text-sm text-neutral-500">
-            LogShield {tab} — shinkang888-code/logshield Admin Console 연동
-          </div>
+        ) : (
+          <iframe
+            title={`LogShield ${tab}`}
+            src={`${CONSOLE}${current.embed}`}
+            className="min-h-[70vh] flex-1 rounded-xl border border-neutral-700 bg-neutral-900"
+            allow="clipboard-write"
+          />
         )}
       </div>
     </div>

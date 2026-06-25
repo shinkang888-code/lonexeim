@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DEFAULT_EMBED_MODEL, DEFAULT_PII_MODEL } from "@/lib/ai/models-catalog";
-import { hfEmbed, hfPiiMask } from "@/lib/ai/huggingface";
+import { isHfConfigured, hfEmbed, hfPiiMask } from "@/lib/ai/huggingface";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const action = body.action as string;
 
-  if (!process.env.HF_TOKEN) {
+  if (!isHfConfigured()) {
     return NextResponse.json({
       demo: true,
       message: "HF_TOKEN 설정 후 BGE-M3 임베딩·PII NER 연동",

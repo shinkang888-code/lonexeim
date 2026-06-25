@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  DEFAULT_CHAT_MODEL,
-  DEFAULT_LEGAL_MODEL,
-} from "@/lib/ai/models-catalog";
-import { demoChatReply, hfChat } from "@/lib/ai/huggingface";
+import { DEFAULT_CHAT_MODEL, DEFAULT_LEGAL_MODEL } from "@/lib/ai/models-catalog";
+import { isHfConfigured, demoChatReply, hfChat } from "@/lib/ai/huggingface";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -22,7 +19,7 @@ export async function POST(req: NextRequest) {
   const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
 
   try {
-    if (!process.env.HF_TOKEN) {
+    if (!isHfConfigured()) {
       return NextResponse.json({
         role: "assistant",
         content: demoChatReply(lastUser),

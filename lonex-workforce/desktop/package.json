@@ -21,8 +21,9 @@
     "productName": "LONEX Workforce",
     "directories": { "output": "dist" },
     "win": {
-      "target": ["nsis"],
-      "icon": "assets/icon.ico"
+      "target": ["dir"],
+      "icon": "assets/icon.png",
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
