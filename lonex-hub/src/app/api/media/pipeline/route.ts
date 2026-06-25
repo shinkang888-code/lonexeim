@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     if (body.action === "translate") {
-      const translated = await hfTranslate(body.text, body.src_lang, body.tgt_lang);
+      const translated = await hfTranslate(body.text);
       await ingestFromRequest(req, "번역 결과", `${body.text}\n→\n${translated}`, "borderless");
       return NextResponse.json({ translated, src: body.text });
     }

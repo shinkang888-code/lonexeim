@@ -16,10 +16,12 @@ export const AI_MODELS_SEED = [
   { repo_id: "facebook/nllb-200-distilled-600M", category: "Translation", name: "NLLB 200 600M", downloads: 1471409, likes: 926, note: "한↔영 번역" },
 ] as const;
 
-export const DEFAULT_CHAT_MODEL = "Bllossom/llama-3.2-Korean-Bllossom-3B";
+/** HF Router Serverless에서 실제 호출되는 모델 (Bllossom 등은 alias → Qwen2.5) */
+export const DEFAULT_CHAT_MODEL = "Qwen/Qwen2.5-7B-Instruct";
 export const DEFAULT_EMBED_MODEL = "BAAI/bge-m3";
 export const DEFAULT_PII_MODEL = "vmaca123/korean-pii-ner-v3";
-export const DEFAULT_LEGAL_MODEL = "Aniyooo/Qwen3-8B-Legal-Korean";
+export const DEFAULT_LEGAL_MODEL = "Qwen/Qwen2.5-7B-Instruct";
+export const DEFAULT_TRANSLATE_MODEL = "Helsinki-NLP/opus-mt-ko-en";
 
 export const SERVICE_CATEGORIES = [
   {

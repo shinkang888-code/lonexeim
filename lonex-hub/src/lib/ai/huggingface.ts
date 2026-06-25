@@ -1,5 +1,16 @@
 const HF_ROUTER = "https://router.huggingface.co/v1/chat/completions";
-const HF_INFERENCE = "https://api-inference.huggingface.co/models";
+/** api-inference.huggingface.co 는 2025년 폐기 — Router hf-inference 사용 */
+const HF_INFERENCE = "https://router.huggingface.co/hf-inference/models";
+
+/** 커뮤니티 한국어 모델 → HF Serverless Router에서 지원하는 모델로 매핑 */
+const ROUTER_CHAT_ALIASES: Record<string, string> = {
+  "Bllossom/llama-3.2-Korean-Bllossom-3B": "Qwen/Qwen2.5-7B-Instruct",
+  "MLP-KTLim/llama-3-Korean-Bllossom-8B": "Qwen/Qwen2.5-7B-Instruct",
+  "Aniyooo/Qwen3-8B-Legal-Korean": "Qwen/Qwen2.5-7B-Instruct",
+};
+
+export const ROUTER_CHAT_MODEL = "Qwen/Qwen2.5-7B-Instruct";
+export const ROUTER_TRANSLATE_MODEL = "Helsinki-NLP/opus-mt-ko-en";
 
 export function getHfToken(): string | undefined {
   return process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
@@ -9,29 +20,52 @@ export function isHfConfigured(): boolean {
   return !!getHfToken();
 }
 
-function hfHeaders() {
+export function resolveChatModel(modelId: string): string {
+  return ROUTER_CHAT_ALIASES[modelId] ?? modelId;
+}
+
+function hfHeaders(contentType = "application/json") {
   const token = getHfToken();
   if (!token) throw new Error("HF_TOKEN is not configured");
   return {
     Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
+    "Content-Type": contentType,
+    "x-wait-for-model": "true",
   };
 }
 
-/** Router API (OpenAI 호환) → 실패 시 text-generation 폴백 */
+async function hfFetch(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch (e) {
+    const reason = e instanceof Error ? e.message : "network error";
+    throw new Error(`HF request failed (${url}): ${reason}`);
+  }
+}
+
+function parseRouterChatError(status: number, body: string): string {
+  try {
+    const parsed = JSON.parse(body) as { error?: { message?: string } };
+    return parsed.error?.message ?? body.slice(0, 200);
+  } catch {
+    return body.slice(0, 200) || `HTTP ${status}`;
+  }
+}
+
+/** Router API (OpenAI 호환) — 미지원 모델은 alias로 자동 전환 */
 export async function hfChat(
   modelId: string,
   messages: { role: string; content: string }[],
   maxTokens = 512
 ): Promise<string> {
-  const token = getHfToken();
-  if (!token) throw new Error("HF_TOKEN is not configured");
+  if (!getHfToken()) throw new Error("HF_TOKEN is not configured");
 
-  const routerRes = await fetch(HF_ROUTER, {
+  const resolvedModel = resolveChatModel(modelId);
+  const routerRes = await hfFetch(HF_ROUTER, {
     method: "POST",
     headers: hfHeaders(),
     body: JSON.stringify({
-      model: modelId,
+      model: resolvedModel,
       messages,
       max_tokens: maxTokens,
       temperature: 0.7,
@@ -46,42 +80,26 @@ export async function hfChat(
     if (content) return content;
   }
 
-  const prompt = messages
-    .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
-    .join("\n");
-  const genRes = await fetch(`${HF_INFERENCE}/${modelId}`, {
-    method: "POST",
-    headers: hfHeaders(),
-    body: JSON.stringify({
-      inputs: prompt + "\nAssistant:",
-      parameters: { max_new_tokens: maxTokens, return_full_text: false },
-    }),
-  });
-
-  if (!genRes.ok) {
-    const err = await genRes.text();
-    throw new Error(`HF inference failed (${genRes.status}): ${err.slice(0, 200)}`);
-  }
-
-  const genData = (await genRes.json()) as { generated_text?: string } | { generated_text?: string }[];
-  if (Array.isArray(genData)) return genData[0]?.generated_text?.trim() ?? "";
-  return genData.generated_text?.trim() ?? "응답을 생성하지 못했습니다.";
+  const routerErr = await routerRes.text();
+  throw new Error(
+    `HF chat failed (${routerRes.status}, model=${resolvedModel}): ${parseRouterChatError(routerRes.status, routerErr)}`
+  );
 }
 
 export async function hfTranscribe(
   audioBase64: string,
-  modelId = "ghost613/whisper-large-v3-turbo-korean"
+  modelId = "openai/whisper-large-v3"
 ): Promise<string> {
   const binary = Buffer.from(audioBase64, "base64");
-  const res = await fetch(`${HF_INFERENCE}/${modelId}`, {
+  const res = await hfFetch(`${HF_INFERENCE}/${modelId}`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${getHfToken()}`,
-      "Content-Type": "audio/wav",
-    },
+    headers: hfHeaders("audio/wav"),
     body: binary,
   });
-  if (!res.ok) throw new Error(`Whisper failed (${res.status})`);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Whisper failed (${res.status}): ${err.slice(0, 200)}`);
+  }
   const data = (await res.json()) as { text?: string } | { text?: string }[];
   if (Array.isArray(data)) return data.map((d) => d.text).join(" ");
   return data.text ?? "";
@@ -89,28 +107,32 @@ export async function hfTranscribe(
 
 export async function hfTranslate(
   text: string,
-  srcLang = "kor_Hang",
-  tgtLang = "eng_Latn",
-  modelId = "facebook/nllb-200-distilled-600M"
+  modelId = ROUTER_TRANSLATE_MODEL
 ): Promise<string> {
-  const res = await fetch(`${HF_INFERENCE}/${modelId}`, {
+  const res = await hfFetch(`${HF_INFERENCE}/${modelId}`, {
     method: "POST",
     headers: hfHeaders(),
-    body: JSON.stringify({ inputs: text, parameters: { src_lang: srcLang, tgt_lang: tgtLang } }),
+    body: JSON.stringify({ inputs: text }),
   });
-  if (!res.ok) throw new Error(`Translation failed (${res.status})`);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Translation failed (${res.status}): ${err.slice(0, 200)}`);
+  }
   const data = (await res.json()) as { translation_text?: string } | { translation_text?: string }[];
   if (Array.isArray(data)) return data[0]?.translation_text ?? text;
   return data.translation_text ?? text;
 }
 
 export async function hfEmbed(modelId: string, inputs: string[]): Promise<number[][]> {
-  const res = await fetch(`${HF_INFERENCE}/${modelId}`, {
+  const res = await hfFetch(`${HF_INFERENCE}/${modelId}`, {
     method: "POST",
     headers: hfHeaders(),
     body: JSON.stringify({ inputs }),
   });
-  if (!res.ok) throw new Error(`HF embed failed (${res.status})`);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`HF embed failed (${res.status}): ${err.slice(0, 200)}`);
+  }
   const data = await res.json();
   if (Array.isArray(data) && Array.isArray(data[0])) return data as number[][];
   if (Array.isArray(data) && typeof data[0] === "number") return [data as number[]];
@@ -118,12 +140,15 @@ export async function hfEmbed(modelId: string, inputs: string[]): Promise<number
 }
 
 export async function hfPiiMask(text: string, modelId: string): Promise<string> {
-  const res = await fetch(`${HF_INFERENCE}/${modelId}`, {
+  const res = await hfFetch(`${HF_INFERENCE}/${modelId}`, {
     method: "POST",
     headers: hfHeaders(),
     body: JSON.stringify({ inputs: text }),
   });
-  if (!res.ok) throw new Error(`HF PII failed (${res.status})`);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`HF PII failed (${res.status}): ${err.slice(0, 200)}`);
+  }
   const entities = (await res.json()) as {
     entity_group?: string;
     start?: number;
