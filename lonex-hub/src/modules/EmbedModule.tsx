@@ -1,6 +1,7 @@
 "use client";
 
 import { ModulePageHeader, OssBadge } from "@/components/hub/ModuleChrome";
+import { useModuleStrings, useT } from "@/lib/i18n/use-translations";
 import { syncToHq } from "@/lib/workforce-sync";
 
 const ENV_KEYS: Record<string, string> = {
@@ -19,13 +20,13 @@ const ENV_KEYS: Record<string, string> = {
 
 export default function EmbedModule({
   moduleId,
-  title,
   fallbackPath,
 }: {
   moduleId: string;
-  title: string;
   fallbackPath?: string;
 }) {
+  const t = useT();
+  const { name } = useModuleStrings(moduleId);
   const envKey = ENV_KEYS[moduleId];
   const embedUrl =
     (typeof process !== "undefined" && envKey && process.env[envKey]) ||
@@ -35,8 +36,8 @@ export default function EmbedModule({
   async function handleSyncDemo() {
     await syncToHq(
       moduleId === "mail" ? "email" : "document",
-      `${title} 활동 기록`,
-      `${title} 모듈에서 생성된 데모 콘텐츠 — 본사 HQ 동기화`,
+      `${name}`,
+      `${name} — HQ sync demo`,
       { source_module: moduleId }
     );
   }
@@ -44,14 +45,14 @@ export default function EmbedModule({
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f5f5] pb-28">
       <ModulePageHeader
-        title={title}
+        title={name}
         action={
           <button
             type="button"
             onClick={handleSyncDemo}
             className="rounded-lg bg-neutral-900 px-3 py-1 text-xs text-white"
           >
-            본사 동기화
+            {t.embed.syncToHq}
           </button>
         }
       />
@@ -59,27 +60,26 @@ export default function EmbedModule({
         <OssBadge moduleId={moduleId} />
         {embedUrl ? (
           <iframe
-            title={title}
+            title={name}
             src={embedUrl}
             className="min-h-[70vh] flex-1 rounded-xl border bg-white shadow-sm"
             allow="camera; microphone; clipboard-write"
           />
         ) : (
           <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center">
-            <p className="text-sm font-medium text-neutral-700">{title} OSS 백엔드</p>
-            <p className="mt-2 max-w-md text-xs text-neutral-500">
-              Docker Compose 프로필로 기동 후 환경변수 {envKey ?? "URL"}을 설정하세요.
+            <p className="text-sm font-medium text-neutral-700">{name}</p>
+            <p className="mt-2 max-w-md text-xs text-neutral-500">{t.embed.backendHint}</p>
+            <code className="mt-2 block rounded bg-neutral-100 p-2 text-left text-xs">
+              docker compose -f docker-compose.oss.yml --profile {moduleId} up -d
               <br />
-              <code className="mt-2 block rounded bg-neutral-100 p-2 text-left">
-                docker compose -f docker-compose.oss.yml --profile {moduleId} up -d
-              </code>
-            </p>
+              {envKey ?? "URL"}
+            </code>
             <button
               type="button"
               onClick={handleSyncDemo}
               className="mt-4 rounded-lg bg-neutral-900 px-4 py-2 text-xs text-white"
             >
-              데모 데이터 본사 업로드
+              {t.embed.demoUpload}
             </button>
           </div>
         )}

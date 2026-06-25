@@ -21,7 +21,7 @@ interface HubStore {
 const HOME_TAB: DockTab = {
   id: "hub",
   moduleId: "hub",
-  label: "Lonex(공개)",
+  label: "Hub",
   route: "/",
   closable: false,
 };

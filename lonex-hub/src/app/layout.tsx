@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HubDock, HubHeader } from "@/components/hub/HubShell";
+import { LocaleHtmlLang } from "@/components/hub/LocaleHtmlLang";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,8 +21,9 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <body className="min-h-screen bg-[#f5f5f5] antialiased">
+        <LocaleHtmlLang />
         <HubHeader />
         {children}
         <HubDock />

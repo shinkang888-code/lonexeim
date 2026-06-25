@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SERVICE_CATEGORIES } from "@/lib/ai/models-catalog";
+import { useT } from "@/lib/i18n/use-translations";
 
 type Model = {
   repo_id: string;
@@ -14,6 +15,7 @@ type Model = {
 };
 
 export default function ServicesPage() {
+  const t = useT();
   const [models, setModels] = useState<Model[]>([]);
 
   useEffect(() => {
@@ -28,12 +30,10 @@ export default function ServicesPage() {
     <div className="mx-auto max-w-4xl space-y-10 px-4 pb-32 pt-6">
       <header className="text-center">
         <Link href="/" className="text-xs text-neutral-500 underline">
-          ← Hub
+          {t.services.backHub}
         </Link>
-        <h1 className="mt-2 text-2xl font-bold tracking-wide">Lonex AI Services</h1>
-        <p className="mt-2 text-sm text-neutral-600">
-          lonex-ai.vercel.app 큐레이션 OSS — 특허·한국어 LLM·RAG·Workforce Hub
-        </p>
+        <h1 className="mt-2 text-2xl font-bold tracking-wide">{t.services.title}</h1>
+        <p className="mt-2 text-sm text-neutral-600">{t.services.subtitle}</p>
       </header>
 
       {SERVICE_CATEGORIES.map((cat) => (
@@ -45,7 +45,7 @@ export default function ServicesPage() {
               href="/m/logshield"
               className="inline-block rounded-xl bg-neutral-900 px-4 py-2 text-sm text-white"
             >
-              LogShield · 본사통합검색 열기
+              {t.services.openLogshield}
             </Link>
           ) : (
             <ul className="grid gap-3 sm:grid-cols-2">

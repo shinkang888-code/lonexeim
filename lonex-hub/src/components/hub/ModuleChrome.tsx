@@ -1,18 +1,26 @@
 "use client";
 
+"use client";
+
 import { getModule } from "@/lib/module-registry";
+import { useT } from "@/lib/i18n/use-translations";
 
 export function OssBadge({ moduleId }: { moduleId: string }) {
+  const t = useT();
   const mod = getModule(moduleId);
   if (!mod) return null;
   return (
     <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs text-blue-900">
-      <p className="font-semibold">추천 OSS: {mod.oss.github}</p>
+      <p className="font-semibold">
+        {t.oss.recommended}: {mod.oss.github}
+      </p>
       <p className="mt-1 text-blue-800/80">
         {mod.oss.license} · {mod.oss.integration} · {mod.oss.notes}
       </p>
       {mod.oss.hfModels?.length ? (
-        <p className="mt-1 text-blue-700/70">HF: {mod.oss.hfModels.join(", ")}</p>
+        <p className="mt-1 text-blue-700/70">
+          {t.oss.hf}: {mod.oss.hfModels.join(", ")}
+        </p>
       ) : null}
     </div>
   );
