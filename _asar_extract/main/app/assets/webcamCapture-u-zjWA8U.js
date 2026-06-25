@@ -1,0 +1,1 @@
+import{j as e,W as r}from"./index-ak5BsCze.js";const m=({webcamRef:s})=>e.jsx("div",{className:"camBox",children:e.jsx("div",{children:e.jsx(r,{ref:s,screenshotFormat:"image/jpeg"})})});export{m as W};

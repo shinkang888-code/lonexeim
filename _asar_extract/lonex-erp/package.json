@@ -1,0 +1,14 @@
+{
+  "name": "lonex",
+  "version": "1.4.2",
+  "description": "Lonex - 사내 인사/급여/근태/프로젝트 관리 시스템",
+  "main": "main.js",
+  "author": "shinkang888@gmail.com",
+  "publisher": "Lonex.inc",
+  "copyright": "Copyright (c) 2026 Lonex.inc. All rights reserved.",
+  "license": "SEE LICENSE IN LICENSE",
+  "private": true,
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  }
+}

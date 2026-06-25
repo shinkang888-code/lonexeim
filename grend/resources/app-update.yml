@@ -1,4 +1,0 @@
-provider: generic
-url: https://x.grend.kr/downloads/
-channel: latest
-updaterCacheDirName: grend-updater

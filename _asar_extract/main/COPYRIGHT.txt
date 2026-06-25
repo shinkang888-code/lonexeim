@@ -1,0 +1,11 @@
+LONEX CDMS — COPYRIGHT NOTICE
+
+Copyright (c) 2026 Lonex.inc. All rights reserved.
+
+Developer: shinkang888@gmail.com
+Product: LONEX CDMS (Beta)
+Product ID Root: LNX120
+
+This is proprietary commercial source code. Copying is prohibited.
+
+See LICENSE file for full terms.

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'" />
+  <title>Lonex License Activation</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    }
+    .logo { font-size: 22px; font-weight: 700; letter-spacing: 2px; color: #93c5fd; }
+    h1 { font-size: 18px; margin: 12px 0 6px; }
+    .sub { color: #94a3b8; font-size: 13px; line-height: 1.5; margin-bottom: 20px; }
+    label { display: block; font-size: 12px; color: #cbd5e1; margin: 12px 0 6px; }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #0b1220;
+      color: #f8fafc;
+      font-size: 14px;
+    }
+    input:focus { outline: 2px solid #3b82f6; border-color: transparent; }
+    .notice {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.25);
+      font-size: 11px;
+      line-height: 1.55;
+      color: #fecaca;
+    }
+    .legal { margin-top: 14px; font-size: 10px; color: #64748b; line-height: 1.5; }
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #2563eb, #3b82f6);
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.6; cursor: wait; }
+    .error { color: #fca5a5; font-size: 12px; min-height: 18px; margin-top: 8px; }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #f59e0b33;
+      color: #fcd34d;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">BETA · COMMERCIAL</div>
+    <div class="logo">LONEX</div>
+    <h1 id="productName">License Activation</h1>
+    <p class="sub">Lonex.inc 베타 프로그램입니다. 무단 복제·배포·리버스 엔지니어링을 금지합니다.</p>
+
+    <label for="mgmt">Management Number (관리번호)</label>
+    <input id="mgmt" placeholder="예: 12345" autocomplete="off" />
+
+    <label for="key">License Key</label>
+    <input id="key" placeholder="LNX-XXXX-BT-XXXX-XXXX" autocomplete="off" />
+
+    <div class="error" id="error"></div>
+    <button id="activateBtn">Activate &amp; Continue</button>
+
+    <div class="notice">
+      <strong>저작권 및 복제 금지</strong><br />
+      본 소프트웨어는 Lonex.inc의 상용 독점 소스입니다. 개발: shinkang888@gmail.com<br />
+      허가 없는 복사, 공유, 크랙, 변조, 2차 배포를 금지합니다.
+    </div>
+    <div class="legal" id="legal"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    document.getElementById('productName').textContent = params.get('name') || 'Lonex Product';
+
+    async function init() {
+      const info = await window.lonexLicense.getPublisherInfo();
+      document.getElementById('legal').textContent =
+        `${info.copyright} ${info.notice}`;
+    }
+
+    document.getElementById('activateBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('activateBtn');
+      const err = document.getElementById('error');
+      err.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Activating...';
+
+      const managementNumber = document.getElementById('mgmt').value.trim();
+      const licenseKey = document.getElementById('key').value.trim();
+      if (!managementNumber || !licenseKey) {
+        err.textContent = '관리번호와 라이선스 키를 입력하세요.';
+        btn.disabled = false;
+        btn.textContent = 'Activate & Continue';
+        return;
+      }
+
+      const result = await window.lonexLicense.activate(managementNumber, licenseKey);
+      if (result.ok) {
+        await window.lonexLicense.complete(result);
+      } else {
+        err.textContent = `Activation failed: ${result.code || 'UNKNOWN'}`;
+        btn.disabled = false;
+        btn.textContent = 'Activate & Continue';
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>

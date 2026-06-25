@@ -1,0 +1,4 @@
+provider: generic
+url: https://x.lonex.kr/downloads/
+channel: latest
+updaterCacheDirName: lonex-updater

@@ -1,0 +1,11 @@
+{
+  "name": "lonex-cdms",
+  "version": "1.0.1",
+  "description": "LONEX CDMS - 콘텐츠 개발 도구 (편집기, 컷편집기, 촬영기)",
+  "main": "main.js",
+  "author": "shinkang888@gmail.com",
+  "publisher": "Lonex.inc",
+  "copyright": "Copyright (c) 2026 Lonex.inc. All rights reserved.",
+  "license": "SEE LICENSE IN LICENSE",
+  "private": true
+}

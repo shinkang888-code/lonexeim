@@ -1,0 +1,11 @@
+LONEX ERP — COPYRIGHT NOTICE
+
+Copyright (c) 2026 Lonex.inc. All rights reserved.
+
+Developer: shinkang888@gmail.com
+Product: LONEX ERP (Beta)
+Product ID Root: LNX121
+
+This is proprietary commercial source code. Copying is prohibited.
+
+See LICENSE file for full terms.

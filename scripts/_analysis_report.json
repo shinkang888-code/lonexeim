@@ -1,0 +1,250 @@
+{
+  "total_files": 1526,
+  "total_mb": 1400.25,
+  "top_dirs": [
+    {
+      "name": "(root)",
+      "files": 22,
+      "mb": 605.93
+    },
+    {
+      "name": "lonex-erp",
+      "files": 76,
+      "mb": 269.74
+    },
+    {
+      "name": "_asar_extract",
+      "files": 1367,
+      "mb": 242.59
+    },
+    {
+      "name": "resources",
+      "files": 2,
+      "mb": 241.52
+    },
+    {
+      "name": "locales",
+      "files": 55,
+      "mb": 40.25
+    },
+    {
+      "name": "scripts",
+      "files": 4,
+      "mb": 0.21
+    }
+  ],
+  "extensions": [
+    {
+      "ext": ".exe",
+      "files": 8,
+      "mb": 738.48
+    },
+    {
+      "ext": ".asar",
+      "files": 2,
+      "mb": 242.93
+    },
+    {
+      "ext": ".woff2",
+      "files": 315,
+      "mb": 177.25
+    },
+    {
+      "ext": ".pak",
+      "files": 116,
+      "mb": 92.21
+    },
+    {
+      "ext": ".dll",
+      "files": 12,
+      "mb": 44.22
+    },
+    {
+      "ext": ".jpg",
+      "files": 10,
+      "mb": 38.8
+    },
+    {
+      "ext": ".dat",
+      "files": 2,
+      "mb": 19.97
+    },
+    {
+      "ext": ".js",
+      "files": 578,
+      "mb": 18.78
+    },
+    {
+      "ext": ".html",
+      "files": 3,
+      "mb": 17.49
+    },
+    {
+      "ext": ".wasm",
+      "files": 1,
+      "mb": 4.3
+    },
+    {
+      "ext": ".bin",
+      "files": 4,
+      "mb": 1.91
+    },
+    {
+      "ext": ".css",
+      "files": 15,
+      "mb": 1.24
+    },
+    {
+      "ext": ".png",
+      "files": 65,
+      "mb": 1.2
+    },
+    {
+      "ext": ".svg",
+      "files": 289,
+      "mb": 0.41
+    },
+    {
+      "ext": ".map",
+      "files": 46,
+      "mb": 0.4
+    },
+    {
+      "ext": ".gif",
+      "files": 3,
+      "mb": 0.31
+    },
+    {
+      "ext": ".woff",
+      "files": 9,
+      "mb": 0.19
+    },
+    {
+      "ext": ".mjs",
+      "files": 1,
+      "mb": 0.1
+    },
+    {
+      "ext": "(no ext)",
+      "files": 14,
+      "mb": 0.03
+    },
+    {
+      "ext": ".json",
+      "files": 20,
+      "mb": 0.01
+    },
+    {
+      "ext": ".ico",
+      "files": 6,
+      "mb": 0.0
+    },
+    {
+      "ext": ".md",
+      "files": 2,
+      "mb": 0.0
+    },
+    {
+      "ext": ".txt",
+      "files": 2,
+      "mb": 0.0
+    },
+    {
+      "ext": ".py",
+      "files": 1,
+      "mb": 0.0
+    },
+    {
+      "ext": ".bnf",
+      "files": 1,
+      "mb": 0.0
+    },
+    {
+      "ext": ".yml",
+      "files": 1,
+      "mb": 0.0
+    }
+  ],
+  "largest_files": [
+    {
+      "path": "LONEX-CDMS-Setup_v1.0.1.exe",
+      "mb": 299.46
+    },
+    {
+      "path": "resources/app.asar",
+      "mb": 241.42
+    },
+    {
+      "path": "LONEX CDMS.exe",
+      "mb": 180.11
+    },
+    {
+      "path": "lonex-erp/Lonex.exe",
+      "mb": 180.04
+    },
+    {
+      "path": "Lonex-Setup_v1.4.2.exe",
+      "mb": 78.24
+    },
+    {
+      "path": "icudtl.dat",
+      "mb": 9.98
+    },
+    {
+      "path": "lonex-erp/icudtl.dat",
+      "mb": 9.98
+    },
+    {
+      "path": "_asar_extract/main/app/fonts/SourceHanSerif.woff2",
+      "mb": 9.93
+    },
+    {
+      "path": "LICENSES.chromium.html",
+      "mb": 8.75
+    },
+    {
+      "path": "lonex-erp/LICENSES.chromium.html",
+      "mb": 8.75
+    },
+    {
+      "path": "libGLESv2.dll",
+      "mb": 8.03
+    },
+    {
+      "path": "lonex-erp/libGLESv2.dll",
+      "mb": 8.03
+    },
+    {
+      "path": "_asar_extract/main/app/fonts/SourceHanSans.woff2",
+      "mb": 7.16
+    },
+    {
+      "path": "_asar_extract/main/app/assets/login-bg2-Dn2Pa63H.jpg",
+      "mb": 6.11
+    },
+    {
+      "path": "_asar_extract/main/app/web/img/login-bg2.jpg",
+      "mb": 6.11
+    },
+    {
+      "path": "resources.pak",
+      "mb": 5.49
+    },
+    {
+      "path": "lonex-erp/resources.pak",
+      "mb": 5.49
+    },
+    {
+      "path": "vk_swiftshader.dll",
+      "mb": 5.28
+    },
+    {
+      "path": "lonex-erp/vk_swiftshader.dll",
+      "mb": 5.28
+    },
+    {
+      "path": "_asar_extract/main/app/assets/login-bg4-0-MpaItC.jpg",
+      "mb": 5.26
+    }
+  ]
+}
