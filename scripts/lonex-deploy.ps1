@@ -86,12 +86,17 @@ function Invoke-NeonMigrate {
     try {
         Write-Step "Neon — link Vercel env + migrate"
         vercel link --project lonexeim-hub --yes 2>&1 | Out-Null
-        vercel env pull .env.deploy --environment=production --yes 2>&1 | Out-Null
-        if (-not (Test-Path ".env.deploy")) {
-            Write-Warning "No .env.deploy — skip Neon migrate"
+        foreach ($envFile in @(".env.development.local", ".env.deploy")) {
+            if (-not (Test-Path $envFile)) {
+                vercel env pull $envFile --environment=development --yes 2>&1 | Out-Null
+            }
+        }
+        $pullFile = if (Test-Path ".env.development.local") { ".env.development.local" } else { ".env.deploy" }
+        if (-not (Test-Path $pullFile)) {
+            Write-Warning "No env file — skip Neon migrate"
             return
         }
-        Get-Content .env.deploy | ForEach-Object {
+        Get-Content $pullFile | ForEach-Object {
             if ($_ -match '^([^=]+)=(.*)$') { Set-Item -Path "env:$($matches[1])" -Value $matches[2].Trim('"') }
         }
         if (-not $env:DATABASE_URL -and $env:POSTGRES_URL) {

@@ -3,6 +3,8 @@ node_modules
 out
 .env*.local
 .env.deploy
+.env.development.local
+.env.preview
 .env.production
 .env.vercel-copy
 .env.vercel-dev

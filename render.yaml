@@ -23,7 +23,7 @@ services:
   - type: cron
     name: lonex-hub-sync-health
     runtime: node
-    plan: free
+    plan: starter
     region: singapore
     schedule: "*/5 * * * *"
     buildCommand: cd lonex-hub && npm ci
