@@ -1,0 +1,31 @@
+# LONEX — Render Blueprint (optional OSS / worker services)
+# Validate: render blueprints validate render.yaml
+# Deploy: connect repo in Render Dashboard or `render deploys create`
+#
+# Hub primary deploy remains Vercel (lonexeim-hub). This file documents
+# Render-side services for Phase 1+ OSS workers.
+
+services:
+  - type: web
+    name: lonex-oss-livekit
+    runtime: image
+    plan: free
+    region: singapore
+    autoDeploy: false
+    image:
+      url: docker.io/livekit/livekit-server:latest
+    dockerCommand: --dev --bind 0.0.0.0
+    healthCheckPath: /
+    envVars:
+      - key: LIVEKIT_BIND
+        value: "0.0.0.0"
+
+  - type: cron
+    name: lonex-hub-sync-health
+    runtime: node
+    plan: free
+    region: singapore
+    schedule: "*/5 * * * *"
+    buildCommand: cd lonex-hub && npm ci
+    startCommand: node -e "fetch('https://lonexeim-hub.vercel.app/api/cron/sync-health').then(r=>r.text()).then(console.log)"
+    autoDeploy: false

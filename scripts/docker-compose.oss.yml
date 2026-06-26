@@ -1,34 +1,229 @@
-# LONEX Hub — OSS module backends (Phase 1)
-# Usage: docker compose -f scripts/docker-compose.oss.yml --profile dify up -d
-# Env: copy from lonex-hub/.env.local or Vercel pull
+# LONEX Hub — OSS module backends (local Docker)
+# Usage:
+#   docker compose -f scripts/docker-compose.oss.yml --env-file scripts/docker-oss.env up -d
+#   docker compose -f scripts/docker-compose.oss.yml --profile core --profile chat up -d
+
+name: lonex-oss
+
+x-restart: &restart
+  restart: unless-stopped
 
 services:
-  dify-api:
-    profiles: [dify]
-    image: langgenius/dify-api:1.4.0
-    environment:
-      SECRET_KEY: ${DIFY_SECRET_KEY:-change-me}
-      DB_USERNAME: postgres
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      DB_HOST: dify-db
-      DB_PORT: 5432
-      DB_DATABASE: dify
-      REDIS_HOST: dify-redis
-      REDIS_PORT: 6379
-    depends_on: [dify-db, dify-redis]
-    ports: ["5001:5001"]
+  # ── Core (가볍고 Hub 연동 우선) ──
+  livekit:
+    profiles: [core, livekit, video-chat]
+    <<: *restart
+    image: livekit/livekit-server:latest
+    command: --dev --bind 0.0.0.0
+    ports: ["7880:7880", "7881:7881", "7882:7882/udp"]
 
-  dify-web:
-    profiles: [dify]
-    image: langgenius/dify-web:1.4.0
+  mediacms-db:
+    profiles: [core, mediacms, media]
+    <<: *restart
+    image: postgres:15-alpine
     environment:
-      CONSOLE_API_URL: http://localhost:5001
-      APP_API_URL: http://localhost:5001
-    ports: ["3001:3000"]
-    depends_on: [dify-api]
+      POSTGRES_USER: mediacms
+      POSTGRES_PASSWORD: ${MEDIACMS_DB_PASSWORD:-mediacms}
+      POSTGRES_DB: mediacms
+    volumes: [mediacms_pg:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d mediacms -U mediacms"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mediacms-redis:
+    profiles: [core, mediacms, media]
+    <<: *restart
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  mediacms-migrate:
+    profiles: [core, mediacms, media]
+    image: mediacms/mediacms:latest
+    environment:
+      ENABLE_UWSGI: "no"
+      ENABLE_NGINX: "no"
+      ENABLE_CELERY_SHORT: "no"
+      ENABLE_CELERY_LONG: "no"
+      ENABLE_CELERY_BEAT: "no"
+      SECRET_KEY: ${MEDIACMS_SECRET:-lonex-mediacms-dev}
+      POSTGRES_HOST: mediacms-db
+      POSTGRES_USER: mediacms
+      POSTGRES_PASSWORD: ${MEDIACMS_DB_PASSWORD:-mediacms}
+      POSTGRES_NAME: mediacms
+      REDIS_LOCATION: redis://mediacms-redis:6379/1
+      ADMIN_USER: ${MEDIACMS_ADMIN:-admin}
+      ADMIN_EMAIL: admin@localhost
+      ADMIN_PASSWORD: ${MEDIACMS_ADMIN_PASSWORD:-lonex-admin}
+    command: ["./deploy/docker/prestart.sh"]
+    restart: on-failure
+    depends_on:
+      mediacms-db:
+        condition: service_healthy
+      mediacms-redis:
+        condition: service_healthy
+
+  mediacms:
+    profiles: [core, mediacms, media]
+    <<: *restart
+    image: mediacms/mediacms:latest
+    ports: ["8800:80"]
+    environment:
+      ENABLE_CELERY_BEAT: "no"
+      ENABLE_CELERY_SHORT: "no"
+      ENABLE_CELERY_LONG: "no"
+      ENABLE_MIGRATIONS: "no"
+      SECRET_KEY: ${MEDIACMS_SECRET:-lonex-mediacms-dev}
+      POSTGRES_HOST: mediacms-db
+      POSTGRES_USER: mediacms
+      POSTGRES_PASSWORD: ${MEDIACMS_DB_PASSWORD:-mediacms}
+      POSTGRES_NAME: mediacms
+      REDIS_LOCATION: redis://mediacms-redis:6379/1
+      FRONTEND_HOST: http://localhost:8800
+    volumes: [mediacms_data:/home/mediacms.io/mediacms/media_files]
+    depends_on:
+      mediacms-migrate:
+        condition: service_completed_successfully
+
+  nextcloud:
+    profiles: [core, nextcloud, web-drive]
+    <<: *restart
+    image: nextcloud:29-apache
+    ports: ["8081:80"]
+    environment:
+      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN:-admin}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_PASSWORD:-lonex-admin}
+    volumes: [nextcloud_data:/var/www/html]
+
+  roundcube:
+    profiles: [core, roundcube, mail]
+    <<: *restart
+    image: roundcube/roundcubemail:latest
+    ports: ["8080:80"]
+    environment:
+      ROUNDCUBEMAIL_DEFAULT_HOST: ${IMAP_HOST:-ssl://imap.gmail.com}
+      ROUNDCUBEMAIL_SMTP_SERVER: ${SMTP_HOST:-tls://smtp.gmail.com}
+
+  # ── Chat / Support ──
+  rocketchat-mongo:
+    profiles: [chat, rocketchat]
+    <<: *restart
+    image: mongo:6
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    volumes: [rocketchat_mongo:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rocketchat-mongo-init:
+    profiles: [chat, rocketchat]
+    image: mongo:6
+    depends_on:
+      rocketchat-mongo:
+        condition: service_healthy
+    restart: "no"
+    entrypoint:
+      - bash
+      - -c
+      - |
+        for i in $(seq 1 30); do
+          mongosh --host rocketchat-mongo:27017 --eval '
+            try { if (rs.status().ok) quit(0); } catch (e) {}
+            rs.initiate({_id:"rs0", members:[{_id:0, host:"rocketchat-mongo:27017"}]});
+          ' && exit 0
+          sleep 2
+        done
+        exit 1
+
+  rocketchat:
+    profiles: [chat, rocketchat]
+    <<: *restart
+    image: rocket.chat:6.13.0
+    environment:
+      MONGO_URL: mongodb://rocketchat-mongo:27017/rocketchat?replicaSet=rs0
+      ROOT_URL: http://localhost:3002
+      PORT: 3000
+    ports: ["3002:3000"]
+    depends_on:
+      rocketchat-mongo-init:
+        condition: service_completed_successfully
+
+  chatwoot-redis:
+    profiles: [support, chatwoot]
+    <<: *restart
+    image: redis:7-alpine
+
+  chatwoot-db:
+    profiles: [support, chatwoot]
+    <<: *restart
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: chatwoot
+      POSTGRES_PASSWORD: ${CHATWOOT_DB_PASSWORD:-chatwoot}
+      POSTGRES_DB: chatwoot
+    volumes: [chatwoot_pg:/var/lib/postgresql/data]
+
+  chatwoot:
+    profiles: [support, chatwoot]
+    <<: *restart
+    image: chatwoot/chatwoot:latest
+    command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
+    ports: ["3004:3000"]
+    environment:
+      FRONTEND_URL: http://localhost:3004
+      POSTGRES_HOST: chatwoot-db
+      POSTGRES_USERNAME: chatwoot
+      POSTGRES_PASSWORD: ${CHATWOOT_DB_PASSWORD:-chatwoot}
+      POSTGRES_DATABASE: chatwoot
+      REDIS_URL: redis://chatwoot-redis:6379
+      SECRET_KEY_BASE: ${CHATWOOT_SECRET:-lonex-chatwoot-secret-change-me}
+    depends_on: [chatwoot-db, chatwoot-redis]
+
+  # ── Notes ──
+  outline-redis:
+    profiles: [notes, outline]
+    <<: *restart
+    image: redis:7-alpine
+
+  outline-db:
+    profiles: [notes, outline]
+    <<: *restart
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: outline
+      POSTGRES_PASSWORD: outline
+      POSTGRES_DB: outline
+    volumes: [outline_pg:/var/lib/postgresql/data]
+
+  outline:
+    profiles: [notes, outline]
+    <<: *restart
+    image: outlinewiki/outline:latest
+    ports: ["3003:3000"]
+    environment:
+      DATABASE_URL: postgres://outline:outline@outline-db:5432/outline
+      REDIS_URL: redis://outline-redis:6379
+      SECRET_KEY: ${OUTLINE_SECRET:-lonex-outline-secret}
+      UTILS_SECRET: ${OUTLINE_UTILS_SECRET:-lonex-outline-utils}
+      URL: http://localhost:3003
+    depends_on: [outline-db, outline-redis]
+
+  # ── AI (heavy — profile dify) ──
+  dify-redis:
+    profiles: [dify, ai-assistant]
+    <<: *restart
+    image: redis:7-alpine
 
   dify-db:
-    profiles: [dify]
+    profiles: [dify, ai-assistant]
+    <<: *restart
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: postgres
@@ -36,92 +231,38 @@ services:
       POSTGRES_DB: dify
     volumes: [dify_pg:/var/lib/postgresql/data]
 
-  dify-redis:
-    profiles: [dify]
-    image: redis:7-alpine
-
-  rocketchat:
-    profiles: [rocketchat]
-    image: rocket.chat:6.13.0
+  dify-api:
+    profiles: [dify, ai-assistant]
+    <<: *restart
+    image: langgenius/dify-api:1.4.0
     environment:
-      MONGO_URL: mongodb://rocketchat-mongo:27017/rocketchat
-      ROOT_URL: http://localhost:3002
-    ports: ["3002:3000"]
-    depends_on: [rocketchat-mongo]
+      MODE: api
+      SECRET_KEY: ${DIFY_SECRET_KEY:-lonex-dify-secret}
+      DB_USERNAME: postgres
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_HOST: dify-db
+      DB_PORT: 5432
+      DB_DATABASE: dify
+      REDIS_HOST: dify-redis
+      REDIS_PORT: 6379
+    ports: ["5001:5001"]
+    depends_on: [dify-db, dify-redis]
 
-  rocketchat-mongo:
-    profiles: [rocketchat]
-    image: mongo:6
-
-  roundcube:
-    profiles: [roundcube]
-    image: roundcube/roundcubemail:latest
-    ports: ["8080:80"]
+  dify-web:
+    profiles: [dify, ai-assistant]
+    <<: *restart
+    image: langgenius/dify-web:1.4.0
     environment:
-      ROUNDCUBEMAIL_DEFAULT_HOST: ${IMAP_HOST:-imap.example.com}
-
-  livekit:
-    profiles: [livekit]
-    image: livekit/livekit-server:latest
-    command: --dev
-    ports: ["7880:7880", "7881:7881", "7882:7882/udp"]
-
-  mediacms:
-    profiles: [mediacms]
-    image: mediacms/mediacms:latest
-    ports: ["8800:80"]
-    environment:
-      SECRET_KEY: ${MEDIACMS_SECRET:-change-me}
-
-  nextcloud:
-    profiles: [nextcloud]
-    image: nextcloud:29-apache
-    ports: ["8081:80"]
-    volumes: [nextcloud_data:/var/www/html]
-
-  outline:
-    profiles: [outline]
-    image: outlinewiki/outline:latest
-    ports: ["3003:3000"]
-    environment:
-      DATABASE_URL: postgres://outline:outline@outline-db:5432/outline
-      REDIS_URL: redis://outline-redis:6379
-      SECRET_KEY: ${OUTLINE_SECRET:-change-me}
-      URL: http://localhost:3003
-    depends_on: [outline-db, outline-redis]
-
-  outline-db:
-    profiles: [outline]
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: outline
-      POSTGRES_PASSWORD: outline
-      POSTGRES_DB: outline
-
-  outline-redis:
-    profiles: [outline]
-    image: redis:7-alpine
-
-  chatwoot:
-    profiles: [chatwoot]
-    image: chatwoot/chatwoot:latest
-    ports: ["3004:3000"]
-    environment:
-      FRONTEND_URL: http://localhost:3004
-      POSTGRES_HOST: chatwoot-db
-      REDIS_URL: redis://chatwoot-redis:6379
-    depends_on: [chatwoot-db, chatwoot-redis]
-
-  chatwoot-db:
-    profiles: [chatwoot]
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_PASSWORD: chatwoot
-
-  chatwoot-redis:
-    profiles: [chatwoot]
-    image: redis:7-alpine
+      CONSOLE_API_URL: http://localhost:5001
+      APP_API_URL: http://localhost:5001
+    ports: ["3001:3000"]
+    depends_on: [dify-api]
 
 volumes:
   dify_pg:
+  mediacms_pg:
+  mediacms_data:
   nextcloud_data:
+  rocketchat_mongo:
+  chatwoot_pg:
+  outline_pg:

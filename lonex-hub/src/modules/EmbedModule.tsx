@@ -18,6 +18,18 @@ const ENV_KEYS: Record<string, string> = {
   logshield: "NEXT_PUBLIC_LOGSHIELD_CONSOLE_URL",
 };
 
+/** docker-compose profile hint per module */
+const DOCKER_PROFILES: Record<string, string> = {
+  "ai-assistant": "dify",
+  chat: "chat",
+  mail: "core",
+  "video-chat": "core",
+  "web-drive": "core",
+  media: "core",
+  notes: "notes",
+  support: "support",
+};
+
 export default function EmbedModule({
   moduleId,
   fallbackPath,
@@ -28,6 +40,7 @@ export default function EmbedModule({
   const t = useT();
   const { name } = useModuleStrings(moduleId);
   const envKey = ENV_KEYS[moduleId];
+  const dockerProfile = DOCKER_PROFILES[moduleId] ?? moduleId;
   const embedUrl =
     (typeof process !== "undefined" && envKey && process.env[envKey]) ||
     fallbackPath ||
@@ -70,9 +83,9 @@ export default function EmbedModule({
             <p className="text-sm font-medium text-neutral-700">{name}</p>
             <p className="mt-2 max-w-md text-xs text-neutral-500">{t.embed.backendHint}</p>
             <code className="mt-2 block rounded bg-neutral-100 p-2 text-left text-xs">
-              docker compose -f docker-compose.oss.yml --profile {moduleId} up -d
+              .\scripts\docker-oss.ps1 up -Profile {dockerProfile} -Wait -SyncEnv
               <br />
-              {envKey ?? "URL"}
+              {envKey ?? "URL"} in lonex-hub/.env.local
             </code>
             <button
               type="button"

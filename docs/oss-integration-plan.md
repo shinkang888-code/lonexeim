@@ -55,10 +55,12 @@
 - [x] module-registry: ai-assistant, media, logshield, hq-search, workforce → `demo: false`
 
 ### Phase 1 (2~4주) — OSS Docker 프로필
-1. `scripts/docker-compose.oss.yml` — 모듈별 profile
-2. Hub env: `DIFY_URL`, `ROCKETCHAT_URL`, … (Vercel)
-3. 각 Module.tsx: demo stub → iframe/embed URL 로드
-4. Neon migration: `hq_*` 테이블 프로덕션 검증
+1. `scripts/docker-compose.oss.yml` — 모듈별 profile ✅
+2. `scripts/docker-oss.ps1` — Docker CLI 래퍼 (Desktop 자동 기동, `-SyncEnv`) ✅
+3. `scripts/sync-docker-env.mjs` — `docker-oss.env` → `lonex-hub/.env.local` ✅
+4. Hub env: `NEXT_PUBLIC_*` (로컬 `.env.local` / Vercel Preview)
+5. 각 Module.tsx: demo stub → iframe/embed URL 로드
+6. Neon migration: `hq_*` 테이블 프로덕션 검증
 
 ### Phase 2 (1~2개월) — AI 커널 경량화
 1. pgvector extension on Neon
@@ -117,6 +119,12 @@ lonexeim-work/
 ```bash
 # Hub 빌드
 cd lonex-hub && npm run build
+
+# OSS Docker (로컬)
+.\scripts\docker-oss.ps1 up -Profile core -Wait -SyncEnv
+.\scripts\docker-oss.ps1 up -Profile chat          # Rocket.Chat
+node scripts/sync-docker-env.mjs                   # Hub .env.local 병합
+```
 
 # HQ ingest (API key 필요)
 curl -X POST https://lonexeim-hub.vercel.app/api/hq/ingest \

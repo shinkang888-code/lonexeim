@@ -44,6 +44,13 @@ cd lonex-hub && npm run build          # ✅ 2026-06-27
 ## Electron Hub OS Shell 실행
 
 ```powershell
+# 1) OSS 백엔드 (Docker CLI)
+.\scripts\docker-oss.ps1 up -Profile core -Wait -SyncEnv
+
+# 2) Hub 로컬 dev
+cd lonex-hub && npm run dev
+
+# 3) Electron OS Shell
 $env:LONEX_USE_HUB_SHELL="1"
 $env:LONEX_HUB_OS_URL="https://lonexeim-hub.vercel.app/os_dashboard"
 # lonex-eim-desktop/dist 또는 LONEX EIM.exe
@@ -58,9 +65,10 @@ $env:LONEX_HUB_OS_URL="https://lonexeim-hub.vercel.app/os_dashboard"
 | 14 | /api/ai/vector/search BFF | ✅ |
 | 15 | migrate-vector.sql | ✅ |
 | 16 | Vercel 배포 | ✅ b2cbeae 이후 Phase1 커밋 예정 |
+| 17 | OSS Docker CLI (`docker-oss.ps1`) | ✅ core profile 기동 + sync-docker-env |
 
 ## 미완 (외부 의존)
 
 - [ ] x.lonex.kr SSH / Docker / DB connection string
 - [ ] EIM TSX 원본 복구
-- [ ] OSS docker profile 실기동 (dify, rocketchat 등)
+- [x] OSS docker profile 실기동 — `.\scripts\docker-oss.ps1 up -Profile core -Wait -SyncEnv`
