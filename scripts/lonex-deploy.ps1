@@ -130,8 +130,12 @@ function Invoke-RenderValidate {
     $render = Get-RenderCli
     if (-not $render -or $SkipRender) { return }
     if (-not (Test-Path $RenderYaml)) { return }
-    Write-Step "Render — blueprint validate"
+    Write-Step "Render — blueprint validate + services"
     & $render blueprints validate $RenderYaml 2>&1 | Write-Host
+    $createScript = Join-Path $PSScriptRoot "render-create.ps1"
+    if (Test-Path $createScript) {
+        pwsh -NoProfile -File $createScript 2>&1 | Write-Host
+    }
 }
 
 function Invoke-DockerCore {

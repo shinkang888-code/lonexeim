@@ -25,6 +25,8 @@ services:
     runtime: node
     plan: starter
     region: singapore
+    repo: https://github.com/shinkang888-code/lonexeim
+    branch: master
     schedule: "*/5 * * * *"
     buildCommand: cd lonex-hub && npm ci
     startCommand: node -e "fetch('https://lonexeim-hub.vercel.app/api/cron/sync-health').then(r=>r.text()).then(console.log)"
