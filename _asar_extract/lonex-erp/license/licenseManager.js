@@ -14,7 +14,7 @@ const { loadLicenseRecord, saveLicenseRecord, clearLicenseRecord, evaluateStored
 const { verifyInstallIntegrity } = require('./integrityGuard');
 
 function getProductConfig(productKind) {
-  return PRODUCT[productKind] || PRODUCT.CDMS;
+  return PRODUCT[productKind] || PRODUCT.EIM;
 }
 
 function buildArtifactToken({ managementNumber, licenseKey, productCode, installId, deviceFingerprint }) {

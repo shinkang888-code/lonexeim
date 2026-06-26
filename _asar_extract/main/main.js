@@ -7,10 +7,10 @@ const { URL } = require('url');
 const { registerLicenseIpc, ensureLicensedStartup } = require('./license/licenseManager');
 const { replaceLegacyGrendPaths } = require('./lib/path-alias');
 
-registerLicenseIpc(ipcMain, 'CDMS');
+registerLicenseIpc(ipcMain, 'EIM');
 
 // ── Config ──
-const APP_NAME = 'LONEX CDMS';
+const APP_NAME = 'LONEX EIM';
 const API_HOST = replaceLegacyGrendPaths(
   process.env.LONEX_API_HOST || (process.env.NODE_ENV === 'development' ? 'dx.lonex.kr' : 'x.lonex.kr')
 );
@@ -73,7 +73,7 @@ function startLocalServer() {
     });
 
     localServer.listen(LOCAL_PORT, '127.0.0.1', () => {
-      console.log(`[CDMS] Local server: http://127.0.0.1:${LOCAL_PORT}`);
+      console.log(`[EIM] Local server: http://127.0.0.1:${LOCAL_PORT}`);
       resolve(LOCAL_PORT);
     });
   });
@@ -127,7 +127,7 @@ function proxyToRemote(clientReq, clientRes, url) {
   });
 
   proxyReq.on('error', (err) => {
-    console.error('[CDMS] Proxy error:', err.message);
+    console.error('[EIM] Proxy error:', err.message);
     if (!clientRes.headersSent) {
       clientRes.writeHead(502);
       clientRes.end('Proxy Error');
@@ -224,7 +224,7 @@ const fileStreams = {};
 const recSessions = {};
 
 ipcMain.on('recording:start', (event, { sessionId, sources }) => {
-  const saveDir = path.join(app.getPath('videos'), 'LONEX-CDMS', sessionId);
+  const saveDir = path.join(app.getPath('videos'), 'LONEX-EIM', sessionId);
   fs.mkdirSync(saveDir, { recursive: true });
   recSessions[sessionId] = { saveDir, startedAt: Date.now() };
 
@@ -260,7 +260,7 @@ ipcMain.on('recording:stop', (event, { sessionId }) => {
 });
 
 ipcMain.handle('recording:listFiles', async (event, { sessionId }) => {
-  const saveDir = path.join(app.getPath('videos'), 'LONEX-CDMS', sessionId);
+  const saveDir = path.join(app.getPath('videos'), 'LONEX-EIM', sessionId);
   if (!fs.existsSync(saveDir)) return [];
   return fs.readdirSync(saveDir).map(f => ({
     name: f,
@@ -280,13 +280,13 @@ ipcMain.handle('recording:deleteFile', async (event, { filePath }) => {
 });
 
 ipcMain.handle('recording:getSaveDir', async () => {
-  const dir = path.join(app.getPath('videos'), 'LONEX-CDMS');
+  const dir = path.join(app.getPath('videos'), 'LONEX-EIM');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 });
 
 ipcMain.handle('recording:listSessions', async () => {
-  const baseDir = path.join(app.getPath('videos'), 'LONEX-CDMS');
+  const baseDir = path.join(app.getPath('videos'), 'LONEX-EIM');
   if (!fs.existsSync(baseDir)) return [];
   return fs.readdirSync(baseDir, { withFileTypes: true })
     .filter(d => d.isDirectory())
@@ -311,7 +311,7 @@ app.on('ready', () => {
 
 // ── 앱 라이프사이클 ──
 app.whenReady().then(async () => {
-  const licensed = await ensureLicensedStartup('CDMS');
+  const licensed = await ensureLicensedStartup('EIM');
   if (!licensed) return;
   await startLocalServer();
   createWindow();

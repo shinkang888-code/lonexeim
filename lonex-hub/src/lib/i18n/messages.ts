@@ -46,8 +46,8 @@ const ko: Messages = {
       name: "캘린더",
       description: "일정·예약",
     },
-    cdms: {
-      name: "콘텐츠개발도구",
+    media: {
+      name: "콘텐츠 제작",
       description: "워크플로·촬영·컷편집·종합편집",
     },
     borderless: {
@@ -166,7 +166,7 @@ const en: Messages = {
       name: "Calendar",
       description: "Scheduling and bookings",
     },
-    cdms: {
+    media: {
       name: "Content Studio",
       description: "Workflow, filming, rough cut, and final edit",
     },
@@ -286,7 +286,7 @@ const ja: Messages = {
       name: "カレンダー",
       description: "予定管理・予約",
     },
-    cdms: {
+    media: {
       name: "コンテンツ制作ツール",
       description: "ワークフロー・撮影・ラフカット・本編集",
     },
@@ -406,7 +406,7 @@ const zh: Messages = {
       name: "日历",
       description: "日程与预约",
     },
-    cdms: {
+    media: {
       name: "内容开发工具",
       description: "工作流、拍摄、粗剪与精剪",
     },
@@ -525,7 +525,7 @@ const id: Messages = {
       name: "Kalender",
       description: "Jadwal dan reservasi",
     },
-    cdms: {
+    media: {
       name: "Studio Konten",
       description: "Alur kerja, syuting, rough cut, dan editing final",
     },
@@ -645,7 +645,7 @@ const vi: Messages = {
       name: "Lịch",
       description: "Lịch trình và đặt lịch",
     },
-    cdms: {
+    media: {
       name: "Công cụ phát triển nội dung",
       description: "Quy trình, quay phim, cắt thô và biên tập hoàn chỉnh",
     },

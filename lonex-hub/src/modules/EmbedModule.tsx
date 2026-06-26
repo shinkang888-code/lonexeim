@@ -14,7 +14,7 @@ const ENV_KEYS: Record<string, string> = {
   notes: "NEXT_PUBLIC_OUTLINE_URL",
   support: "NEXT_PUBLIC_CHATWOOT_URL",
   billing: "NEXT_PUBLIC_AKAUNTING_URL",
-  cdms: "NEXT_PUBLIC_MEDIACMS_URL",
+  media: "NEXT_PUBLIC_MEDIACMS_URL",
   logshield: "NEXT_PUBLIC_LOGSHIELD_CONSOLE_URL",
 };
 

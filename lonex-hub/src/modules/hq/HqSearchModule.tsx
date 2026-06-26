@@ -99,7 +99,7 @@ export default function HqSearchModule() {
             <option value="email">이메일</option>
             <option value="document">문서</option>
             <option value="chat">채팅</option>
-            <option value="cdms">CDMS</option>
+            <option value="cdms">EIM</option>
             <option value="erp">ERP</option>
           </select>
           <button

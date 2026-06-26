@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       const b64 = body.audio_base64 as string;
       if (!b64) return NextResponse.json({ detail: "audio_base64 required" }, { status: 400 });
       const text = await hfTranscribe(b64);
-      await ingestFromRequest(req, "CDMS 자막", text, "cdms");
+      await ingestFromRequest(req, "Media 자막", text, "cdms");
       return NextResponse.json({ subtitles: text });
     }
 

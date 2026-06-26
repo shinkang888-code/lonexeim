@@ -1,6 +1,6 @@
 "use client";
 
-import CdmsModule from "@/modules/cdms/CdmsModule";
+import MediaModule from "@/modules/media/MediaModule";
 import BorderlessModule from "@/modules/borderless/BorderlessModule";
 import LogshieldModule from "@/modules/logshield/LogshieldModule";
 import HqSearchModule from "@/modules/hq/HqSearchModule";
@@ -22,8 +22,8 @@ const EMBED_MODULES = [
 
 export default function ModulePageClient({ moduleId }: { moduleId: string }) {
   switch (moduleId) {
-    case "cdms":
-      return <CdmsModule />;
+    case "media":
+      return <MediaModule />;
     case "borderless":
       return <BorderlessModule />;
     case "logshield":

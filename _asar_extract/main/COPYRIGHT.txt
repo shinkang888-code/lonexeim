@@ -1,9 +1,9 @@
-LONEX CDMS — COPYRIGHT NOTICE
+LONEX EIM — COPYRIGHT NOTICE
 
 Copyright (c) 2026 Lonex.inc. All rights reserved.
 
 Developer: shinkang888@gmail.com
-Product: LONEX CDMS (Beta)
+Product: LONEX EIM (Beta)
 Product ID Root: LNX120
 
 This is proprietary commercial source code. Copying is prohibited.

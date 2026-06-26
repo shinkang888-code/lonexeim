@@ -1,7 +1,7 @@
 {
-  "name": "lonex-cdms",
+  "name": "lonex-eim",
   "version": "1.0.1",
-  "description": "LONEX CDMS - 콘텐츠 개발 도구 (편집기, 컷편집기, 촬영기)",
+  "description": "LONEX EIM - Enterprise Information Management (기업정보관리) — 직원 포털·문서·콘텐츠 통합",
   "main": "main.js",
   "author": "shinkang888@gmail.com",
   "publisher": "Lonex.inc",

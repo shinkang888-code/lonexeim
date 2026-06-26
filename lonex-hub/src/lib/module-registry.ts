@@ -91,11 +91,11 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     },
   },
   {
-    id: "cdms",
-    name: "콘텐츠개발도구",
+    id: "media",
+    name: "콘텐츠 제작",
     category: "communication",
     icon: "Video",
-    route: "/m/cdms",
+    route: "/m/media",
     description: "워크플로·촬영·컷편집·종합편집",
     demo: true,
     oss: {

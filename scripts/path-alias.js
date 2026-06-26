@@ -1,52 +1,60 @@
 'use strict';
 
 /**
- * Legacy Grend → Lonex path/URL/string normalization.
- * Used at runtime for stored configs and at build/verify time.
+ * Legacy EIM / Grend → Lonex EIM path/URL/string normalization.
+ * EIM = Enterprise Information Management (기업정보관리)
  */
-const GREND_REPLACEMENTS = [
-  [/grend\.kr/gi, 'lonex.kr'],
-  [/grenderp/gi, 'lonexerp'],
-  [/persist:grenderp/gi, 'persist:lonexerp'],
-  [/grend-workforce-config/gi, 'lonex-workforce-config'],
-  [/grend-license\.dat/gi, 'lonex-license.dat'],
-  [/\.grend-integrity\.json/gi, '.lonex-integrity.json'],
-  [/\.grend-install-id/gi, '.lonex-install-id'],
-  [/grend-cdms/gi, 'lonex-cdms'],
-  [/grend-updater/gi, 'lonex-updater'],
-  [/grendcdms/gi, 'lonexcdms'],
-  [/GREND CDMS/g, 'LONEX CDMS'],
-  [/Grend CDMS/g, 'LONEX CDMS'],
+const CANONICAL_REPLACEMENTS = [
+  [/LONEX EIM/g, 'LONEX EIM'],
+  [/Lonex EIM/g, 'Lonex EIM'],
+  [/LONEX-EIM/gi, 'LONEX-EIM'],
+  [/lonex-eim/gi, 'lonex-eim'],
+  [/lonexeim/gi, 'lonexeim'],
+  [/Uninstall LONEX EIM/gi, 'Uninstall LONEX EIM'],
+  [/Lonex-EIM/gi, 'Lonex-EIM'],
+  [/GREND EIM/g, 'LONEX EIM'],
+  [/Grend EIM/g, 'LONEX EIM'],
+  [/GREND-EIM/gi, 'LONEX-EIM'],
+  [/grend-cdms/gi, 'lonex-eim'],
+  [/grendcdms/gi, 'lonexeim'],
   [/Uninstall GREND/gi, 'Uninstall LONEX'],
   [/Grend-Setup/gi, 'Lonex-Setup'],
-  [/GREND-CDMS/gi, 'LONEX-CDMS'],
-  [/__grend_/gi, '__lonex_'],
-  [/grend_pending_/gi, 'lonex_pending_'],
   [/\\GREND\\/gi, '\\LONEX\\'],
   [/\/GREND\//gi, '/LONEX/'],
+  [/콘텐츠 제작/g, '콘텐츠 제작'],
+  [/기업정보관리/g, '기업정보관리'],
+  [/Enterprise Information Management/gi, 'Enterprise Information Management'],
 ];
 
-/** Substrings that contain "grend" but must not be rewritten (minified libs, locales). */
-const FALSE_POSITIVE = /Renderer|Rendszerjelek|SVGRenderer|HybridRenderer|CanvasRenderer|registerRenderer/i;
+const LEGACY_ALIASES = [
+  ...CANONICAL_REPLACEMENTS,
+  [/\/m\/cdms\b/g, '/m/media'],
+  [/\/cdms\b/g, '/eim'],
+  [/MediaModule/g, 'MediaModule'],
+  [/modules\/cdms/g, 'modules/media'],
+  [/PRODUCT\.EIM/g, 'PRODUCT.EIM'],
+  [/id:\s*["']cdms["']/g, 'id: "media"'],
+];
 
-function replaceLegacyGrendPaths(input) {
-  if (input == null) return input;
+function replaceLegacyPaths(input) {
   if (typeof input !== 'string') return input;
   let out = input;
-  for (const [pattern, replacement] of GREND_REPLACEMENTS) {
+  for (const [pattern, replacement] of LEGACY_ALIASES) {
     out = out.replace(pattern, replacement);
   }
   return out;
 }
 
-function containsLegacyGrendBrand(input) {
+function containsLegacyBrand(input) {
   if (typeof input !== 'string') return false;
-  if (FALSE_POSITIVE.test(input)) return false;
-  return /grend(?!er)/i.test(input);
+  return /EIM|cdms|lonex-eim|lonexeim|GREND|grend/i.test(input);
 }
 
 module.exports = {
-  GREND_REPLACEMENTS,
-  replaceLegacyGrendPaths,
-  containsLegacyGrendBrand,
+  CANONICAL_REPLACEMENTS,
+  LEGACY_ALIASES,
+  replaceLegacyPaths,
+  containsLegacyBrand,
+  replaceLegacyGrendPaths: replaceLegacyPaths,
+  containsLegacyGrendBrand: containsLegacyBrand,
 };

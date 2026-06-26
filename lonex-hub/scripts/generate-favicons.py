@@ -12,13 +12,13 @@ from PIL import Image, ImageEnhance, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path(
-    r"C:\Users\FORYOUCOM\.cursor\projects\g-lonexcdms\assets"
+    r"C:\Users\FORYOUCOM\.cursor\projects\g-lonexeim\assets"
     r"\c__Users_FORYOUCOM_AppData_Roaming_Cursor_User_workspaceStorage_fd654b38752cd5fd969cbe21bd823be6_images______2026-06-26_041825-30eee692-c1f8-41dc-92f4-ba9ae0433494.png"
 )
 
 OUT_APP = ROOT / "src" / "app"
 OUT_PUBLIC = ROOT / "public"
-CDMS_APP = ROOT.parent / "_asar_extract" / "main" / "app"
+EIM_APP = ROOT.parent / "_asar_extract" / "main" / "app"
 
 
 def extract_logo_rgba(src: Path) -> Image.Image:
@@ -102,10 +102,10 @@ def main() -> None:
     save_png(logo, OUT_PUBLIC / "icon-512.png", 512, bg=(15, 20, 25, 255))
     save_png(logo, OUT_PUBLIC / "apple-touch-icon.png", 180, bg=(15, 20, 25, 255))
 
-    # packaged CDMS static app
-    if CDMS_APP.exists():
-        save_ico(logo, CDMS_APP / "favicon.ico")
-        save_png(logo, CDMS_APP / "icon-192.png", 192, bg=(15, 20, 25, 255))
+    # packaged EIM static app
+    if EIM_APP.exists():
+        save_ico(logo, EIM_APP / "favicon.ico")
+        save_png(logo, EIM_APP / "icon-192.png", 192, bg=(15, 20, 25, 255))
 
     print("Generated Lonex favicons:")
     for p in [

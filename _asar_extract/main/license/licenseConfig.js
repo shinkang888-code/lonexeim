@@ -3,10 +3,10 @@
 const { replaceLegacyGrendPaths } = require('../lib/path-alias');
 
 const PRODUCT = {
-  CDMS: {
-    code: 'LONEX-CDMS',
+  EIM: {
+    code: 'LONEX-EIM',
     root: 'LNX120',
-    name: 'LONEX CDMS',
+    name: 'LONEX EIM',
     keyPrefix: 'LNX',
   },
   ERP: {

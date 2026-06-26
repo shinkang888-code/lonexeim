@@ -63,7 +63,7 @@ export default function WorkforceModule() {
         </button>
         {syncMsg && <p className="mt-2 text-center text-xs text-neutral-600">{syncMsg}</p>}
         <p className="mt-6 text-xs leading-relaxed text-neutral-500">
-          모든 Hub 모듈(메일·노트·CDMS·ERP)에서 생성·수정된 데이터는 Workforce Desktop Sync Agent가
+          모든 Hub 모듈(메일·노트·Media·ERP)에서 생성·수정된 데이터는 Workforce Desktop Sync Agent가
           30초마다 본사 HQ에 업로드됩니다. LogShield 보안 이벤트는 실시간 전송됩니다.
         </p>
       </div>

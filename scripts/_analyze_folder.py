@@ -4,7 +4,7 @@ from collections import defaultdict
 import json
 import re
 
-ROOT = Path(r"g:\내 드라이브\lonexcdms")
+ROOT = Path(r"g:\내 드라이브\lonexeim")
 
 ext_stats = defaultdict(lambda: {"count": 0, "size": 0})
 dir_stats = defaultdict(lambda: {"count": 0, "size": 0})
