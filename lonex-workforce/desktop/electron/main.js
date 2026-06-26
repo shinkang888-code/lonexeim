@@ -15,7 +15,7 @@ let syncClient = null;
 let logshieldBridge = null;
 
 const HUB_URL = replaceLegacyGrendPaths(
-  process.env.LONEX_HUB_URL || (isDev ? 'http://localhost:3000' : 'https://lonex-hub.vercel.app')
+  process.env.LONEX_HUB_URL || (isDev ? 'http://localhost:3000' : 'https://lonexeim-hub.vercel.app')
 );
 
 function migrateLegacyGrendStore() {
