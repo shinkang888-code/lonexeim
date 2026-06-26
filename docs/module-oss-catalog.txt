@@ -1,0 +1,194 @@
+# LONEX Hub 모듈별 OSS 카탈로그
+# 조사일: 2026-06-27 | 도구: GitHub CLI, HuggingFace Hub, Kaggle API
+# 용도: 백엔드 미구현 모듈의 오픈소스 후보 및 연동 우선순위
+
+================================================================================
+[모듈] ai-assistant — AI 비서
+================================================================================
+GitHub:
+  - langgenius/dify (146k★) — RAG·워크플로·에이전트, Dify License
+  - langgenius/dify-api — REST API 서버
+  - infiniflow/ragflow (60k★) — 대안 RAG 파이프라인
+HuggingFace:
+  - LGAI-EXAONE/EXAONE-4.0-32B — 한국어 LLM
+  - skt/A.X-4.0-Light — 경량 한국어
+  - BAAI/bge-m3 — 임베딩
+Kaggle:
+  - (참고) kaggle competitions NLP — 파인튜닝 데이터셋
+연동: embed (Dify Widget) + vLLM/Ollama BFF | docker profile: dify
+
+================================================================================
+[모듈] chat — 웹채팅
+================================================================================
+GitHub:
+  - RocketChat/Rocket.Chat (45k★) MIT
+  - mattermost/mattermost (34k★) — 대안
+HuggingFace: (없음 — 채팅 백엔드)
+Kaggle: (없음)
+연동: Livechat Widget SDK + OAuth SSO | docker profile: rocketchat
+
+================================================================================
+[모듈] mail — 웹메일
+================================================================================
+GitHub:
+  - roundcube/roundcubemail (7k★) GPL-3.0
+  - stalwartlabs/stalwart (6k★) — JMAP 대안
+HuggingFace: (없음)
+Kaggle: (없음)
+연동: iframe + IMAP/SMTP | docker profile: roundcube
+
+================================================================================
+[모듈] calendar — 캘린더
+================================================================================
+GitHub:
+  - calcom/cal.com (45k★) MIT
+  - tui-calendar/tui.calendar — 임베드 UI
+HuggingFace: (없음)
+Kaggle: (없음)
+연동: @calcom/embed-react | docker profile: calcom
+
+================================================================================
+[모듈] media — 콘텐츠 제작 (구 CDMS)
+================================================================================
+GitHub:
+  - mediacms-io/mediacms (5k★) AGPL — VOD·업로드 API
+  - OpenCut-app/OpenCut MIT — 브라우저 컷편집 UI
+  - jianchang512/pyvideotrans (18k★) — 자막·번역 (borderless 공유)
+HuggingFace:
+  - openai/whisper-large-v3 — STT
+  - coqui/XTTS-v2 — TTS
+Kaggle:
+  - kaggle datasets video-editing (참고)
+연동: MediaCMS API + Hub MediaModule BFF | docker profile: mediacms
+
+================================================================================
+[모듈] borderless — 다국어 자막/번역
+================================================================================
+GitHub:
+  - jianchang512/pyvideotrans GPL-3.0
+  - SYSTRAN/faster-whisper — STT 엔진
+HuggingFace:
+  - ghost613/whisper-large-v3-turbo-korean
+  - google/madlad400-3b-mt
+Kaggle:
+  - google/fleurs — STT 파인튜닝 참고
+연동: FastAPI worker + HF Inference | docker profile: borderless-worker
+
+================================================================================
+[모듈] video-chat — 화상채팅
+================================================================================
+GitHub:
+  - livekit/livekit (19k★) Apache-2.0
+  - livekit/livekit-react — components
+HuggingFace:
+  - gradio-app/fastrtc — WebRTC 데모
+Kaggle: (없음)
+연동: @livekit/components-react + LiveKit Cloud/Self-host | docker profile: livekit
+
+================================================================================
+[모듈] bidding — 입찰정보
+================================================================================
+GitHub:
+  - kyj2294/naramarket-pro-MCP — 나라장터 MCP
+  - public-data/data.go.kr samples (조달청 OpenAPI)
+HuggingFace:
+  - skt/A.X-4.0-Light — 공고문 요약
+Kaggle:
+  - data.go.kr 조달청 API (공식, Kaggle 미러 없음 — REST 직접)
+연동: Hub BFF `/api/bidding/*` → data.go.kr + MCP | serverless cron
+
+================================================================================
+[모듈] logshield — DLP/EDR
+================================================================================
+GitHub:
+  - shinkang888-code/logshield (Enterprise Internal)
+  - elastic/beats — 로그 수집 참고
+  - osquery/osquery — 엔드포인트 가시성
+HuggingFace: (없음)
+Kaggle: (없음)
+연동: Windows Agent → `/api/hq/security` ✅ | Console URL env
+
+================================================================================
+[모듈] hq-search — 본사 통합검색
+================================================================================
+GitHub:
+  - lonex-workforce/hq-server (FastAPI/SQLite FTS5) — 레거시
+  - meilisearch/meilisearch (54k★) — Neon/pg FTS 대안
+HuggingFace: (없음)
+Kaggle: (없음)
+연동: Neon Postgres + `/api/hq/*` ✅ (Vercel) | demo: false
+
+================================================================================
+[모듈] web-drive — 웹드라이브
+================================================================================
+GitHub:
+  - nextcloud/server (35k★) AGPL
+  - rclone/rclone — 동기화 CLI (EIM webDrive API 호환 참고)
+HuggingFace: (없음)
+Kaggle: (없음)
+연동: iframe OAuth2 + WebDAV | docker profile: nextcloud
+
+================================================================================
+[모듈] notes — 팀 위키
+================================================================================
+GitHub:
+  - outline/outline (39k★) BSL-1.1
+  - docmost/docmost — 대안
+HuggingFace:
+  - ONTHEIT/BizOnAI-OCR — 한국 문서 OCR
+  - BAAI/bge-m3 — 검색 임베딩
+Kaggle: (없음)
+연동: iframe + Outline API | docker profile: outline
+
+================================================================================
+[모듈] support — 고객센터
+================================================================================
+GitHub:
+  - chatwoot/chatwoot (33k★) MIT
+HuggingFace: (없음)
+Kaggle: (없음)
+연동: window.$chatwoot SDK embed | docker profile: chatwoot
+
+================================================================================
+[모듈] billing — 요금관리
+================================================================================
+GitHub:
+  - akaunting/akaunting (9k★) BSL-1.1
+  - invoiceninja/invoiceninja — 대안
+HuggingFace: (없음)
+Kaggle: (없음)
+연동: iframe + Akaunting REST | docker profile: akaunting
+
+================================================================================
+[모듈] workforce — 직원설정·동기화
+================================================================================
+GitHub:
+  - lonex-workforce/desktop (Proprietary) — Electron sync agent
+  - sync-client.js → `/api/hq/ingest` ✅
+HuggingFace: (없음)
+Kaggle: (없음)
+연동: component + Neon API keys | demo: false
+
+================================================================================
+[EIM 백엔드] x.lonex.kr — 소스 없음, asar 역추출
+================================================================================
+관측:
+  - x.grend.kr HTTPS 200 (운영 중)
+  - x.lonex.kr DNS 미해석 (2026-06-27)
+  - EIM bundle API 896 unique paths → docs/eim-api-paths.txt
+재구현 OSS 스택 (Phase 2 경량):
+  - PostgreSQL (Neon) + pgvector — Milvus 대체
+  - Postgres ltree / Apache AGE — Neo4j 대체
+  - MongoDB API 호환: FerretDB 또는 Postgres JSONB
+GitHub 참고:
+  - pgvector/pgvector
+  - apache/age
+  - FerretDB/FerretDB
+
+================================================================================
+docker-compose 프로필 (scripts/docker-compose.oss.yml — Phase 1)
+================================================================================
+profiles:
+  dify, rocketchat, roundcube, calcom, mediacms, livekit,
+  nextcloud, outline, chatwoot, akaunting, borderless-worker
+공통 env: DATABASE_URL, HF_TOKEN, KAGGLE_API_TOKEN (Vercel에서 복사됨)

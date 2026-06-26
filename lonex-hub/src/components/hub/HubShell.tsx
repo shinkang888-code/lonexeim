@@ -136,9 +136,14 @@ export function HubHeader() {
         <Link href="/" className="text-lg font-bold tracking-widest text-neutral-900">
           LONEX
         </Link>
-        <Link href="/services" className="text-xs text-neutral-600 underline">
-          {t.header.ai}
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/os_dashboard" className="text-xs text-neutral-600 underline">
+            OS Shell
+          </Link>
+          <Link href="/services" className="text-xs text-neutral-600 underline">
+            {t.header.ai}
+          </Link>
+        </div>
       </div>
       <div className="flex justify-center border-t border-neutral-100 px-4 py-2">
         <LanguageToggle />

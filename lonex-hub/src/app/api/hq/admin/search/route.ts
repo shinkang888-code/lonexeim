@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSql } from "@/lib/db";
+import { verifyAdminRequest } from "@/lib/hq/admin-session";
 
 export const dynamic = "force-dynamic";
 
-/** Hub 관리 UI용 — Admin Secret 브라우저 노출 없음 */
+/** Hub 관리 UI용 — httpOnly admin session 또는 X-Admin-Secret */
 export async function GET(req: NextRequest) {
+  if (!verifyAdminRequest(req)) {
+    return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+  }
   const q = req.nextUrl.searchParams.get("q")?.trim();
   if (!q) return NextResponse.json({ detail: "q required" }, { status: 400 });
 

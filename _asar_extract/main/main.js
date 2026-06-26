@@ -15,10 +15,13 @@ const API_HOST = replaceLegacyGrendPaths(
   process.env.LONEX_API_HOST || (process.env.NODE_ENV === 'development' ? 'dx.lonex.kr' : 'x.lonex.kr')
 );
 const API_ORIGIN = `https://${API_HOST}`;
-const LOCAL_PORT = 14837; // 로컬 서버 포트 (충돌 가능성 낮은 번호)
-const STATIC_DIR = path.join(__dirname, 'app'); // Vite build 결과물
-
-let mainWindow = null;
+const HUB_OS_URL = replaceLegacyGrendPaths(
+  process.env.LONEX_HUB_OS_URL || process.env.NEXT_PUBLIC_HUB_URL || 'https://lonexeim-hub.vercel.app/os_dashboard'
+);
+const USE_HUB_SHELL = process.env.LONEX_USE_HUB_SHELL === '1' || process.env.LONEX_USE_HUB_SHELL === 'true';
+const EIM_ENTRY_PATH = '/eim';
+const LOCAL_PORT = 14837;
+const STATIC_DIR = path.join(__dirname, 'app');
 let tray = null;
 let localServer = null;
 
@@ -164,30 +167,38 @@ function createWindow() {
   });
 
   mainWindow.once('ready-to-show', () => mainWindow.show());
-  mainWindow.loadURL(`http://127.0.0.1:${LOCAL_PORT}/cdms`);
 
-  // 외부 링크 → 기본 브라우저
+  if (USE_HUB_SHELL) {
+    mainWindow.loadURL(HUB_OS_URL);
+  } else {
+    mainWindow.loadURL(`http://127.0.0.1:${LOCAL_PORT}${EIM_ENTRY_PATH}`);
+  }
+
+  const allowedOrigins = USE_HUB_SHELL
+    ? [new URL(HUB_OS_URL).origin]
+    : [`http://127.0.0.1:${LOCAL_PORT}`];
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (!url.startsWith(`http://127.0.0.1:${LOCAL_PORT}`)) {
+    if (!allowedOrigins.some((o) => url.startsWith(o))) {
       shell.openExternal(url);
       return { action: 'deny' };
     }
     return { action: 'allow' };
   });
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    if (!url.startsWith(`http://127.0.0.1:${LOCAL_PORT}`)) {
+    if (!allowedOrigins.some((o) => url.startsWith(o))) {
       event.preventDefault();
       shell.openExternal(url);
     }
   });
 
-  // /dashboard로 이동 시 /cdms로 강제 리다이렉트
-  mainWindow.webContents.on('did-navigate-in-page', (event, url) => {
-    const u = new URL(url);
-    if (u.pathname === '/dashboard' || u.pathname === '/dashboardQuitter' || u.pathname === '/') {
-      mainWindow.loadURL(`http://127.0.0.1:${LOCAL_PORT}/cdms`);
-    }
-  });
+  if (!USE_HUB_SHELL) {
+    mainWindow.webContents.on('did-navigate-in-page', (event, url) => {
+      const u = new URL(url);
+      if (u.pathname === '/dashboard' || u.pathname === '/dashboardQuitter' || u.pathname === '/') {
+        mainWindow.loadURL(`http://127.0.0.1:${LOCAL_PORT}${EIM_ENTRY_PATH}`);
+      }
+    });
+  }
 
   mainWindow.on('closed', () => { mainWindow = null; });
 

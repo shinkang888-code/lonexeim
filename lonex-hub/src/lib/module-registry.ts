@@ -32,7 +32,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "Bot",
     route: "/m/ai-assistant",
     description: "RAG·워크플로·에이전트 기업 AI",
-    demo: true,
+    demo: false,
     oss: {
       github: "langgenius/dify",
       license: "Dify License",
@@ -97,7 +97,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "Video",
     route: "/m/media",
     description: "워크플로·촬영·컷편집·종합편집",
-    demo: true,
+    demo: false,
     oss: {
       github: "mediacms-io/mediacms",
       license: "AGPL-3.0",
@@ -170,7 +170,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "Shield",
     route: "/m/logshield",
     description: "DLP·EDR 원격보안관제 — USB·네트워크·프린트·UEBA",
-    demo: true,
+    demo: false,
     oss: {
       github: "shinkang888-code/logshield",
       license: "Enterprise Internal",
@@ -185,7 +185,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "Search",
     route: "/m/hq-search",
     description: "직원 이메일·문서·보안로그 일괄 검색 (본사 전용)",
-    demo: true,
+    demo: false,
     oss: {
       github: "lonex-workforce/hq-server",
       license: "Proprietary",
@@ -265,7 +265,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "Settings",
     route: "/m/workforce",
     description: "본사 API Key·동기화·LogShield 연동 상태",
-    demo: true,
+    demo: false,
     oss: {
       github: "lonex-workforce/desktop",
       license: "Proprietary",

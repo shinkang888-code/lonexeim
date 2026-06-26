@@ -30,7 +30,7 @@ class SyncClient {
 
     const batch = this.queue.splice(0, 200);
     try {
-      const res = await this.request('POST', '/api/v1/ingest', {
+      const res = await this.request('POST', '/api/hq/ingest', {
         endpoint_id: this.config.endpointId,
         items: batch,
       });
@@ -43,7 +43,7 @@ class SyncClient {
 
   async postSecurityEvent(event) {
     try {
-      const res = await this.request('POST', '/api/v1/security/ingest', {
+      const res = await this.request('POST', '/api/hq/security', {
         agent_id: event.agent_id || 'lonex-desktop',
         endpoint_id: this.config.endpointId,
         endpoint_hostname: this.config.endpointHostname,
