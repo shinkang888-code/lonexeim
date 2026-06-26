@@ -94,6 +94,9 @@ function Invoke-NeonMigrate {
         Get-Content .env.deploy | ForEach-Object {
             if ($_ -match '^([^=]+)=(.*)$') { Set-Item -Path "env:$($matches[1])" -Value $matches[2].Trim('"') }
         }
+        if (-not $env:DATABASE_URL -and $env:POSTGRES_URL) {
+            $env:DATABASE_URL = $env:POSTGRES_URL
+        }
         if (-not $env:DATABASE_URL) {
             Write-Warning "DATABASE_URL missing — skip migrate"
             return
