@@ -7,7 +7,12 @@ import { DOCK_Z, useOsStore, WIN_Z_BASE } from "@/store/os-store";
 import { OsWindowRouter } from "./OsWindowRouter";
 import { UnifiedSearch } from "./UnifiedSearch";
 
-const POC_APPS = ["ai-assistant", "hq-search"] as const;
+import { visibleModules } from "@/lib/module-access";
+
+const LAUNCHER_APPS = visibleModules(
+  MODULE_REGISTRY.filter((m) => !m.demo),
+  ["all"]
+).map((m) => m.id);
 
 export function OsShellDesktop() {
   const { windows, openWindow, closeWindow, focusWindow, moveWindow } = useOsStore();
@@ -52,7 +57,7 @@ export function OsShellDesktop() {
 
       {/* 앱 아이콘 그리드 (122) */}
       <div className="relative z-[1] flex flex-wrap gap-3 p-6 pt-4">
-        {POC_APPS.map((id) => {
+        {LAUNCHER_APPS.map((id) => {
           const mod = MODULE_REGISTRY.find((m) => m.id === id)!;
           return (
             <button
@@ -131,7 +136,7 @@ export function OsShellDesktop() {
       </div>
 
       <p className="absolute bottom-14 left-4 text-[10px] text-neutral-500">
-        z-base={WIN_Z_BASE} · POC: {POC_APPS.join(", ")}
+        z-base={WIN_Z_BASE} · 앱: {LAUNCHER_APPS.length}개
       </p>
     </div>
   );

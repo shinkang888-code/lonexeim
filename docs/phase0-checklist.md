@@ -49,9 +49,18 @@ $env:LONEX_HUB_OS_URL="https://lonexeim-hub.vercel.app/os_dashboard"
 # lonex-eim-desktop/dist 또는 LONEX EIM.exe
 ```
 
-## 다음 Phase 1 티켓
+## Phase 1 (진행)
 
-1. `scripts/docker-compose.oss.yml` — dify, rocketchat, … profiles
-2. Hub home → `/os_dashboard` 링크
-3. module-registry `searchKeywords` + `roles`
-4. `/api/ai/vector/search` pgvector POC
+| # | 항목 | 상태 |
+|---|------|------|
+| 12 | module-meta roles/searchKeywords | ✅ |
+| 13 | OS Shell 실모듈 iframe | ✅ |
+| 14 | /api/ai/vector/search BFF | ✅ |
+| 15 | migrate-vector.sql | ✅ |
+| 16 | Vercel 배포 | ✅ b2cbeae 이후 Phase1 커밋 예정 |
+
+## 미완 (외부 의존)
+
+- [ ] x.lonex.kr SSH / Docker / DB connection string
+- [ ] EIM TSX 원본 복구
+- [ ] OSS docker profile 실기동 (dify, rocketchat 등)

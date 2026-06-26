@@ -13,24 +13,31 @@ function PathSync({ windowId }: { windowId: string }) {
   return null;
 }
 
-function WindowHome({ title }: { title: string }) {
+/** Hub 모듈 페이지를 iframe으로 로드 (OS 윈도우 격리) */
+function ModuleFrame({ moduleId }: { moduleId: string }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center bg-white p-6 text-center">
-      <p className="text-lg font-semibold text-neutral-900">{title}</p>
-      <p className="mt-2 text-sm text-neutral-500">MemoryRouter 격리 — 윈도우별 독립 라우팅 (특허 141)</p>
-    </div>
+    <iframe
+      title={moduleId}
+      src={`/m/${moduleId}`}
+      className="h-full min-h-[240px] w-full border-0 bg-white"
+      allow="camera; microphone; clipboard-write"
+    />
   );
 }
 
-function WindowSubPage({ label }: { label: string }) {
+function WindowSubPage({ moduleId, label }: { moduleId: string; label: string }) {
   const nav = useNavigate();
   return (
-    <div className="h-full bg-white p-4">
-      <button type="button" className="text-xs text-blue-600 underline" onClick={() => nav("/")}>
-        ← 홈
-      </button>
-      <h2 className="mt-4 text-base font-semibold">{label}</h2>
-      <p className="mt-2 text-sm text-neutral-600">딥라우트 복원 POC — 새로고침 시 path 영속화</p>
+    <div className="flex h-full flex-col bg-white">
+      <div className="border-b px-3 py-1.5">
+        <button type="button" className="text-xs text-blue-600 underline" onClick={() => nav("/")}>
+          ← 홈
+        </button>
+        <span className="ml-2 text-xs text-neutral-500">{label}</span>
+      </div>
+      <div className="min-h-0 flex-1">
+        <ModuleFrame moduleId={moduleId} />
+      </div>
     </div>
   );
 }
@@ -38,7 +45,6 @@ function WindowSubPage({ label }: { label: string }) {
 export function OsWindowRouter({
   windowId,
   moduleId,
-  title,
   initialPath,
 }: {
   windowId: string;
@@ -50,15 +56,18 @@ export function OsWindowRouter({
     <MemoryRouter initialEntries={[initialPath || "/"]}>
       <PathSync windowId={windowId} />
       <Routes>
-        <Route path="/" element={<WindowHome title={title} />} />
+        <Route path="/" element={<ModuleFrame moduleId={moduleId} />} />
         {moduleId === "ai-assistant" && (
-          <Route path="/chat" element={<WindowSubPage label="AI 채팅 화면" />} />
+          <Route path="/chat" element={<WindowSubPage moduleId="ai-assistant" label="AI 채팅" />} />
         )}
         {moduleId === "hq-search" && (
-          <Route path="/results" element={<WindowSubPage label="검색 결과" />} />
+          <Route path="/results" element={<WindowSubPage moduleId="hq-search" label="검색 결과" />} />
         )}
         {moduleId === "media" && (
-          <Route path="/editor/:projectId/:slideId" element={<WindowSubPage label="콘텐츠 편집기 (딥라우트)" />} />
+          <Route
+            path="/editor/:projectId/:slideId"
+            element={<WindowSubPage moduleId="media" label="콘텐츠 편집기" />}
+          />
         )}
       </Routes>
     </MemoryRouter>
