@@ -1,0 +1,57 @@
+{
+  "name": "lonex-eim-desktop",
+  "version": "1.0.2",
+  "private": true,
+  "description": "LONEX EIM — Enterprise Information Management (기업정보관리)",
+  "main": "../_asar_extract/main/main.js",
+  "author": "shinkang888@gmail.com",
+  "scripts": {
+    "icons": "python ../scripts/generate-lonex-icons.py",
+    "pack": "electron-builder --dir --win",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^35.7.5",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "kr.lonex.eim",
+    "productName": "LONEX EIM",
+    "copyright": "Copyright © 2026 Lonex.inc",
+    "directories": {
+      "app": "../_asar_extract/main",
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "**/*",
+      "!dist",
+      "!node_modules"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false,
+      "artifactName": "LONEX-EIM-Setup_${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "LONEX EIM.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "LONEX EIM",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/uninstallerIcon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

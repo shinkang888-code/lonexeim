@@ -3,5 +3,10 @@ node_modules
 out
 .env*.local
 .env.production
+.env.vercel-copy
+.env.vercel-dev
+.env.lonexeim-check
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel
