@@ -1,0 +1,105 @@
+#!/usr/bin/env node
+/**
+ * Phase 2 — 멀티테넌트, AI 크레딧 계량, aiUsageLog, 프롬프트 레지스트리
+ * Run: npm run db:migrate:phase2  (DATABASE_URL required)
+ */
+import { neon } from "@neondatabase/serverless";
+
+const url = process.env.DATABASE_URL?.replace(/^["']|["']$/g, "");
+if (!url) {
+  console.error("DATABASE_URL required");
+  process.exit(1);
+}
+const sql = neon(url);
+
+async function main() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS hub_tenants (
+      id TEXT PRIMARY KEY,
+      slug TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      subdomain TEXT,
+      status TEXT DEFAULT 'active',
+      settings_json JSONB DEFAULT '{}',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    INSERT INTO hub_tenants (id, slug, name, subdomain)
+    VALUES ('tenant-default', 'default', 'Default Organization', NULL)
+    ON CONFLICT (id) DO NOTHING
+  `;
+
+  await sql`ALTER TABLE hub_employees ADD COLUMN IF NOT EXISTS tenant_id TEXT DEFAULT 'tenant-default'`;
+  await sql`ALTER TABLE hub_api_keys ADD COLUMN IF NOT EXISTS tenant_id TEXT DEFAULT 'tenant-default'`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS ai_usage_log (
+      id TEXT PRIMARY KEY,
+      tenant_id TEXT NOT NULL REFERENCES hub_tenants(id),
+      employee_id TEXT REFERENCES hub_employees(id),
+      endpoint TEXT NOT NULL,
+      model TEXT,
+      tokens_in INT DEFAULT 0,
+      tokens_out INT DEFAULT 0,
+      credits_used NUMERIC(12,4) DEFAULT 0,
+      metadata_json JSONB DEFAULT '{}',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS ai_credit_balances (
+      tenant_id TEXT NOT NULL REFERENCES hub_tenants(id),
+      employee_id TEXT,
+      balance_credits NUMERIC(12,4) NOT NULL DEFAULT 0,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (tenant_id, employee_id)
+    )
+  `;
+
+  await sql`
+    INSERT INTO ai_credit_balances (tenant_id, employee_id, balance_credits)
+    VALUES ('tenant-default', NULL, 10000)
+    ON CONFLICT (tenant_id, employee_id) DO NOTHING
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS ai_prompt_registry (
+      id TEXT PRIMARY KEY,
+      tenant_id TEXT NOT NULL REFERENCES hub_tenants(id),
+      slug TEXT NOT NULL,
+      title TEXT NOT NULL,
+      template TEXT NOT NULL,
+      version INT DEFAULT 1,
+      metadata_json JSONB DEFAULT '{}',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (tenant_id, slug, version)
+    )
+  `;
+
+  await sql`
+    INSERT INTO ai_prompt_registry (id, tenant_id, slug, title, template, version)
+    VALUES (
+      'prompt-default-legal-v1',
+      'tenant-default',
+      'legal-review',
+      '법률 검토 시스템 프롬프트',
+      '당신은 한국 법률·계약 검토를 돕는 AI 어시스턴트입니다. 조문·판례 인용 시 출처를 명시하고, 법률 자문은 참고용임을 안내하세요.',
+      1
+    )
+    ON CONFLICT (tenant_id, slug, version) DO NOTHING
+  `;
+
+  await sql`CREATE INDEX IF NOT EXISTS idx_ai_usage_tenant_ts ON ai_usage_log(tenant_id, created_at DESC)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ai_usage_employee ON ai_usage_log(employee_id, created_at DESC)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_prompt_tenant_slug ON ai_prompt_registry(tenant_id, slug)`;
+
+  console.log("Phase 2 migration complete (tenants, ai_usage_log, credits, prompts).");
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

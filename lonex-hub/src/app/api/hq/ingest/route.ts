@@ -1,23 +1,9 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { requireSql } from "@/lib/db";
-import { hashApiKey } from "@/lib/hq/auth";
+import { resolveApiKey } from "@/lib/hq/resolve-api-key";
 
 export const dynamic = "force-dynamic";
-
-async function resolveApiKey(req: NextRequest) {
-  const key = req.headers.get("x-lonex-api-key");
-  if (!key?.startsWith("lnx_sk_")) return null;
-  const sql = requireSql();
-  const rows = await sql`
-    SELECT k.*, e.name AS employee_name, e.dept
-    FROM hub_api_keys k
-    JOIN hub_employees e ON e.id = k.employee_id
-    WHERE k.key_hash = ${hashApiKey(key)} AND k.revoked_at IS NULL AND e.status = 'active'
-    LIMIT 1
-  `;
-  return rows[0] ?? null;
-}
 
 export async function POST(req: NextRequest) {
   try {

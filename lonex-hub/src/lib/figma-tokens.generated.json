@@ -42,7 +42,7 @@
     "hub-gradient-hero": "linear-gradient(105deg, rgba(15,23,42,0.92) 0%, rgba(30,27,75,0.78) 48%, rgba(49,46,129,0.45) 100%)",
     "hub-gradient-mesh": "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99,102,241,0.14), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(14,165,233,0.1), transparent)"
   },
-  "syncedAt": "2026-06-28T09:50:14.766Z",
+  "syncedAt": "2026-06-28T10:49:06.474Z",
   "fileName": "Lonex Hub Design System",
   "source": "local"
 }

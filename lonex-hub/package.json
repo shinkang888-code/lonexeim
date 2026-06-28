@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "node scripts/migrate.mjs",
+    "db:migrate:phase2": "node scripts/migrate-phase2.mjs",
     "db:seed": "node scripts/seed-all.mjs",
     "figma:setup": "node ../scripts/figma-sync.mjs setup",
     "figma:sync": "node ../scripts/figma-sync.mjs sync",
