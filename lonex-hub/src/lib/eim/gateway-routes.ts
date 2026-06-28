@@ -31,14 +31,14 @@ export const EIM_GATEWAY_MAP: Record<string, EimGatewayRoute> = {
   },
   "ai/models": { hubPath: "/api/ai/models", methods: ["GET"] },
   "ai/status": { hubPath: "/api/ai/status", methods: ["GET"] },
-  "ai/tools": { hubPath: "/api/ai/tools", methods: ["GET", "POST"] },
+  "ai/tools": { hubPath: "/api/ai/tools", methods: ["POST"] },
   "ai/contentembedding/search": {
     hubPath: "/api/ai/vector/search",
     methods: ["POST"],
     mapBody: (b) => ({ query: b.query ?? b.q ?? b.text, domain: b.domain, limit: b.limit }),
   },
   "hq/ingest": { hubPath: "/api/hq/ingest", methods: ["GET", "POST"] },
-  "hq/search": { hubPath: "/api/hq/search", methods: ["GET", "POST"] },
+  "hq/search": { hubPath: "/api/hq/search", methods: ["GET"] },
   "hq/stats": { hubPath: "/api/hq/stats", methods: ["GET"] },
 };
 

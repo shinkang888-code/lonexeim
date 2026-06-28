@@ -5,6 +5,7 @@ import {
   migratedPathCount,
   normalizeEimPath,
 } from "@/lib/eim/gateway-routes";
+import { invokeHubHandler } from "@/lib/eim/hub-handlers";
 import { resolveApiKey } from "@/lib/hq/resolve-api-key";
 import { resolveTenant } from "@/lib/tenant/resolve-tenant";
 
@@ -33,28 +34,6 @@ async function handleMemberStub(req: NextRequest, subpath: string) {
     );
   }
   return null;
-}
-
-async function forwardToHub(req: NextRequest, hubPath: string, body?: unknown) {
-  const url = new URL(hubPath, req.nextUrl.origin);
-  const headers = new Headers();
-  req.headers.forEach((v, k) => {
-    if (k.toLowerCase() === "host") return;
-    headers.set(k, v);
-  });
-
-  const init: RequestInit = { method: req.method, headers };
-  if (body !== undefined && req.method !== "GET" && req.method !== "HEAD") {
-    headers.set("content-type", "application/json");
-    init.body = JSON.stringify(body);
-  }
-
-  const res = await fetch(url, init);
-  const text = await res.text();
-  return new NextResponse(text, {
-    status: res.status,
-    headers: { "content-type": res.headers.get("content-type") ?? "application/json" },
-  });
 }
 
 export async function GET(req: NextRequest, ctx: RouteCtx) {
@@ -112,5 +91,8 @@ async function dispatch(req: NextRequest, ctx: RouteCtx) {
     }
   }
 
-  return forwardToHub(req, route.hubPath, body);
+  const direct = await invokeHubHandler(req, route.hubPath, body);
+  if (direct) return direct;
+
+  return NextResponse.json({ detail: "Hub handler not found" }, { status: 500 });
 }
