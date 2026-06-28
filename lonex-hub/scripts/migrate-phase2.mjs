@@ -4,6 +4,7 @@
  * Run: npm run db:migrate:phase2  (DATABASE_URL required)
  */
 import { neon } from "@neondatabase/serverless";
+import { runPhase3HrMigration } from "./migrate-phase3-hr.mjs";
 
 const url = process.env.DATABASE_URL?.replace(/^["']|["']$/g, "");
 if (!url) {
@@ -138,7 +139,9 @@ async function main() {
   `;
   await sql`CREATE INDEX IF NOT EXISTS idx_eim_stub_cat ON eim_api_stub_log(category, created_at DESC)`;
 
-  console.log("Phase 2 migration complete (tenants, credits, pgvector, eim_stub_log).");
+  await runPhase3HrMigration(sql);
+
+  console.log("Phase 2+3 migration complete (tenants, credits, pgvector, approval, attendance, HR).");
 }
 
 main().catch((e) => {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSql } from "@/lib/db";
 import { runAllPhase2Migrations } from "@/lib/db/phase2-schema";
+import { runPhase3HrMigration } from "@/lib/db/phase3-hr-schema";
 import { verifyAdminSecret } from "@/lib/hq/auth";
 
 export const dynamic = "force-dynamic";
@@ -14,9 +15,21 @@ export async function POST(req: NextRequest) {
   try {
     const sql = requireSql();
     await runAllPhase2Migrations(sql);
+    await runPhase3HrMigration(sql);
     return NextResponse.json({
       status: "ok",
-      migrated: ["hub_tenants", "ai_usage_log", "ai_credit_balances", "ai_prompt_registry", "ai_embeddings", "eim_api_stub_log"],
+      migrated: [
+        "hub_tenants",
+        "ai_usage_log",
+        "ai_credit_balances",
+        "ai_prompt_registry",
+        "ai_embeddings",
+        "eim_api_stub_log",
+        "eim_approvals",
+        "eim_attendance_records",
+        "eim_leave_records",
+        "eim_salary_contracts",
+      ],
     });
   } catch (e) {
     console.error("[admin/migrate-phase2]", e);

@@ -4,6 +4,7 @@ import {
   normalizeEimPath,
 } from "@/lib/eim/gateway-routes";
 import { handleEimCategoryStub } from "@/lib/eim/category-stub";
+import { dispatchEimDomain, isLiveEimDomain } from "@/lib/eim/domain-router";
 import { invokeHubHandler } from "@/lib/eim/hub-handlers";
 import { resolveApiKey } from "@/lib/hq/resolve-api-key";
 import { resolveTenant } from "@/lib/tenant/resolve-tenant";
@@ -62,6 +63,10 @@ async function dispatch(req: NextRequest, ctx: RouteCtx) {
 
   const route = EIM_GATEWAY_MAP[normalized];
   if (!route) {
+    if (isLiveEimDomain(normalized)) {
+      const live = await dispatchEimDomain(req, normalized);
+      if (live) return live;
+    }
     return handleEimCategoryStub(req, normalized);
   }
 

@@ -98,12 +98,13 @@ member/session-check, member/home-session-check (stub)
 
 ---
 
-## Phase 3 — 미진행
+## Phase 3 — 진행 (2026-06-28)
 
-- [ ] EIM TSX 원본 복구 (see `docs/eim-tsx-recovery-checklist.md`)
-- [ ] x.lonex.kr SSH / Docker compose (DNS NXDOMAIN)
+- [x] approval / attendance / HR **Hub BFF 실구현** (Neon + domain handlers)
+- [x] EIM TSX 스캔 스크립트 + x.grend.kr API 프로브
+- [ ] EIM TSX 원본 복구 (asar 405 chunks, source map 2건 — TSX 0건)
+- [ ] x.lonex.kr DNS/SSH (x.grend.kr 레거시 180.71.194.246 대안)
 - [ ] EIM API P0 member/login (비밀번호 인증)
-- [ ] approval, attendance, hr* **실구현** (현재 category stub만)
 - [ ] 얼굴 출퇴근 (제3발명), 디자인 복제 (제4발명)
 - [ ] RN WebView, 모바일 포털 (청구항 6~7)
 
