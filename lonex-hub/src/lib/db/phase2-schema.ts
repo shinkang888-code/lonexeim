@@ -1,18 +1,7 @@
-#!/usr/bin/env node
-/**
- * Phase 2 — 멀티테넌트, AI 크레딧 계량, aiUsageLog, 프롬프트 레지스트리
- * Run: npm run db:migrate:phase2  (DATABASE_URL required)
- */
-import { neon } from "@neondatabase/serverless";
+import { NeonQueryFunction } from "@neondatabase/serverless";
 
-const url = process.env.DATABASE_URL?.replace(/^["']|["']$/g, "");
-if (!url) {
-  console.error("DATABASE_URL required");
-  process.exit(1);
-}
-const sql = neon(url);
-
-async function main() {
+/** Phase 2 schema — idempotent, safe to re-run on production */
+export async function runPhase2Migration(sql: NeonQueryFunction<false, false>) {
   await sql`
     CREATE TABLE IF NOT EXISTS hub_tenants (
       id TEXT PRIMARY KEY,
@@ -24,13 +13,11 @@ async function main() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
-
   await sql`
     INSERT INTO hub_tenants (id, slug, name, subdomain)
     VALUES ('tenant-default', 'default', 'Default Organization', NULL)
     ON CONFLICT (id) DO NOTHING
   `;
-
   await sql`ALTER TABLE hub_employees ADD COLUMN IF NOT EXISTS tenant_id TEXT DEFAULT 'tenant-default'`;
   await sql`ALTER TABLE hub_api_keys ADD COLUMN IF NOT EXISTS tenant_id TEXT DEFAULT 'tenant-default'`;
 
@@ -48,7 +35,6 @@ async function main() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
-
   await sql`
     CREATE TABLE IF NOT EXISTS ai_credit_balances (
       tenant_id TEXT NOT NULL REFERENCES hub_tenants(id),
@@ -59,20 +45,14 @@ async function main() {
     )
   `;
   await sql`ALTER TABLE ai_credit_balances ALTER COLUMN employee_id SET DEFAULT ''`;
-  try {
-    await sql`ALTER TABLE ai_credit_balances ALTER COLUMN employee_id DROP NOT NULL`;
-    await sql`UPDATE ai_credit_balances SET employee_id = '' WHERE employee_id IS NULL`;
-    await sql`ALTER TABLE ai_credit_balances ALTER COLUMN employee_id SET NOT NULL`;
-  } catch {
-    /* already migrated */
-  }
-
+  await sql`ALTER TABLE ai_credit_balances ALTER COLUMN employee_id DROP NOT NULL`;
+  await sql`UPDATE ai_credit_balances SET employee_id = '' WHERE employee_id IS NULL`;
+  await sql`ALTER TABLE ai_credit_balances ALTER COLUMN employee_id SET NOT NULL`;
   await sql`
     INSERT INTO ai_credit_balances (tenant_id, employee_id, balance_credits)
     VALUES ('tenant-default', '', 10000)
     ON CONFLICT (tenant_id, employee_id) DO NOTHING
   `;
-
   await sql`
     CREATE TABLE IF NOT EXISTS ai_prompt_registry (
       id TEXT PRIMARY KEY,
@@ -86,7 +66,6 @@ async function main() {
       UNIQUE (tenant_id, slug, version)
     )
   `;
-
   await sql`
     INSERT INTO ai_prompt_registry (id, tenant_id, slug, title, template, version)
     VALUES (
@@ -99,11 +78,13 @@ async function main() {
     )
     ON CONFLICT (tenant_id, slug, version) DO NOTHING
   `;
-
   await sql`CREATE INDEX IF NOT EXISTS idx_ai_usage_tenant_ts ON ai_usage_log(tenant_id, created_at DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_ai_usage_employee ON ai_usage_log(employee_id, created_at DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_prompt_tenant_slug ON ai_prompt_registry(tenant_id, slug)`;
+}
 
+/** pgvector extension + ai_embeddings (Phase 2 AI kernel) */
+export async function runPgvectorMigration(sql: NeonQueryFunction<false, false>) {
   await sql`CREATE EXTENSION IF NOT EXISTS vector`;
   await sql`
     CREATE TABLE IF NOT EXISTS ai_embeddings (
@@ -123,9 +104,12 @@ async function main() {
       USING ivfflat (embedding vector_cosine_ops) WITH (lists = 32)
     `;
   } catch {
-    /* ivfflat needs rows */
+    /* ivfflat needs rows — optional until data exists */
   }
+}
 
+/** EIM category stub registry (approval, attendance, hr …) */
+export async function runEimStubMigration(sql: NeonQueryFunction<false, false>) {
   await sql`
     CREATE TABLE IF NOT EXISTS eim_api_stub_log (
       id SERIAL PRIMARY KEY,
@@ -137,11 +121,10 @@ async function main() {
     )
   `;
   await sql`CREATE INDEX IF NOT EXISTS idx_eim_stub_cat ON eim_api_stub_log(category, created_at DESC)`;
-
-  console.log("Phase 2 migration complete (tenants, credits, pgvector, eim_stub_log).");
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+export async function runAllPhase2Migrations(sql: NeonQueryFunction<false, false>) {
+  await runPhase2Migration(sql);
+  await runPgvectorMigration(sql);
+  await runEimStubMigration(sql);
+}

@@ -4,7 +4,7 @@ import { GET as aiModelsGet } from "@/app/api/ai/models/route";
 import { GET as aiPromptsGet } from "@/app/api/ai/prompts/route";
 import { GET as aiStatusGet } from "@/app/api/ai/status/route";
 import { POST as aiToolsPost } from "@/app/api/ai/tools/route";
-import { GET as vectorSearchGet, POST as vectorSearchPost } from "@/app/api/ai/vector/search/route";
+import { GET as vectorSearchGet, POST as vectorSearchPost, PUT as vectorBulkEmbedPut } from "@/app/api/ai/vector/search/route";
 import { GET as billingCreditsGet, POST as billingCreditsPost } from "@/app/api/billing/credits/route";
 import { GET as billingUsageGet } from "@/app/api/billing/usage/route";
 import { GET as hqIngestGet, POST as hqIngestPost } from "@/app/api/hq/ingest/route";
@@ -15,7 +15,7 @@ type Handler = (req: NextRequest, ctx?: unknown) => Promise<Response>;
 
 /** Hub BFF 핸들러 직접 호출 (Vercel self-fetch 회피) */
 export const HUB_HANDLERS: Record<string, Partial<Record<string, Handler>>> = {
-  "/api/ai/vector/search": { GET: vectorSearchGet, POST: vectorSearchPost },
+  "/api/ai/vector/search": { GET: vectorSearchGet, POST: vectorSearchPost, PUT: vectorBulkEmbedPut },
   "/api/ai/chat": { POST: aiChatPost },
   "/api/ai/models": { GET: aiModelsGet },
   "/api/ai/status": { GET: aiStatusGet },
@@ -42,9 +42,14 @@ export function proxyRequest(req: NextRequest, body?: unknown): NextRequest {
 export async function invokeHubHandler(
   req: NextRequest,
   hubPath: string,
-  body?: unknown
+  body?: unknown,
+  method = req.method
 ): Promise<Response | null> {
-  const handler = HUB_HANDLERS[hubPath]?.[req.method];
+  const handler = HUB_HANDLERS[hubPath]?.[method];
   if (!handler) return null;
-  return handler(proxyRequest(req, body));
+  const proxied = proxyRequest(req, body);
+  if (method !== req.method) {
+    return handler(new NextRequest(proxied.url, { method, headers: proxied.headers, body: proxied.body }));
+  }
+  return handler(proxied);
 }

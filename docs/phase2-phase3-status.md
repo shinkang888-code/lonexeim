@@ -11,12 +11,39 @@
 | **멀티테넌트 (제5발명)** | ❌ | 🟡 POC | `hub_tenants`, `X-Tenant-Slug`, Host 서브도메인 |
 | **aiUsageLog (청구항 10)** | ❌ | 🟡 | `/api/billing/usage`, chat 연동 |
 | **프롬프트 레지스트리 (청10)** | ❌ | 🟡 | `ai_prompt_registry`, `/api/ai/prompts` |
-| **EIM 896 API 대체** | 📦 | 🟡 | `/api/eim/[...path]` 게이트웨이 **12 paths** 매핑 |
-| **pgvector AI 커널** | 🟡 | 🟡 | `migrate-vector.sql` + FTS fallback |
+| **EIM 896 API 대체** | 📦 | 🟡 | 14 exact + **category stub** (approval, attendance, hr …) |
+| **pgvector AI 커널** | 🟡 | 🟡 | cosine + ILIKE/FTS fallback, bulk-embed PUT |
 
 ---
 
-## Phase 2 — 구현됨 (이번 작업)
+## Phase 2 — 구현됨 (2026-06-28 업데이트)
+
+### DB (`POST /api/admin/migrate-phase2` 또는 `npm run db:migrate:phase2`)
+
+- `hub_tenants`, `ai_usage_log`, `ai_credit_balances`, `ai_prompt_registry`
+- `ai_embeddings` + pgvector extension
+- `eim_api_stub_log`
+
+### API (추가)
+
+| 경로 | 기능 |
+|------|------|
+| `POST /api/admin/migrate-phase2` | 프로덕션 Neon 마이그레이션 (X-Admin-Secret) |
+| `PUT /api/ai/vector/search` | bulk-embed (EIM vector/bulk-embed) |
+| `POST /api/ai/vector/search` | **pgvector cosine** (HF embed) + ILIKE/FTS fallback |
+| `/m/billing` | BillingModule — credits + usage UI |
+
+### EIM 게이트웨이 (896 paths)
+
+- **Exact map:** 14 paths → Hub BFF
+- **Category stub:** approval, attendance, hr, salary, … → structured JSON 501 + `eim_api_stub_log`
+- **member/session-check:** live stub
+
+See `docs/eim-tsx-recovery-checklist.md` for TSX / x.lonex.kr status.
+
+---
+
+## Phase 2 — 구현됨 (이전)
 
 ### DB (`npm run db:migrate:phase2`)
 
@@ -58,20 +85,25 @@ member/session-check, member/home-session-check (stub)
 
 ## Phase 2 — 미완
 
-- [ ] Neon 프로덕션에 `db:migrate:phase2` 실행
-- [ ] pgvector 실제 cosine search (현재 ILIKE + FTS)
+- [ ] Neon 프로덕션에 `db:migrate:phase2` 실행 (Vercel `DATABASE_URL`/`LONEX_HQ_ADMIN_SECRET` 설정 필요)
 - [ ] Dify RAG BFF 연동
-- [ ] 크레딧 UI (billing 모듈 → `/api/billing/credits` 연동)
 - [ ] 테넌트별 Vercel env / Neon schema 분리 (현재 단일 DB)
+
+## Phase 2 — 완료 (2026-06-28 Phase 3)
+
+- [x] pgvector cosine search (`embed.ts` + HF + ILIKE/FTS fallback)
+- [x] BillingModule UI → `/api/billing/credits`, `/api/billing/usage`
+- [x] EIM category stub (896 paths — 14 exact + category JSON 501)
+- [x] `POST /api/admin/migrate-phase2` + `scripts/migrate-phase2-prod.mjs`
 
 ---
 
 ## Phase 3 — 미진행
 
-- [ ] EIM TSX 원본 복구
-- [ ] x.lonex.kr SSH / Docker compose
+- [ ] EIM TSX 원본 복구 (see `docs/eim-tsx-recovery-checklist.md`)
+- [ ] x.lonex.kr SSH / Docker compose (DNS NXDOMAIN)
 - [ ] EIM API P0 member/login (비밀번호 인증)
-- [ ] approval, attendance, hr*, contentProject (800+ paths)
+- [ ] approval, attendance, hr* **실구현** (현재 category stub만)
 - [ ] 얼굴 출퇴근 (제3발명), 디자인 복제 (제4발명)
 - [ ] RN WebView, 모바일 포털 (청구항 6~7)
 

@@ -32,6 +32,7 @@ export const EIM_GATEWAY_MAP: Record<string, EimGatewayRoute> = {
   "ai/models": { hubPath: "/api/ai/models", methods: ["GET"] },
   "ai/status": { hubPath: "/api/ai/status", methods: ["GET"] },
   "ai/tools": { hubPath: "/api/ai/tools", methods: ["POST"] },
+  "ai/vector/bulk-embed": { hubPath: "/api/ai/vector/search", methods: ["PUT", "POST"] },
   "ai/contentembedding/search": {
     hubPath: "/api/ai/vector/search",
     methods: ["POST"],

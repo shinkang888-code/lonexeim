@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const tenant = await resolveTenant(req);
     const amount = Number(body.amount);
-    const employeeId = (body.employee_id as string | null) ?? null;
+    const employeeId = (body.employee_id as string | undefined) ?? "";
 
     if (!Number.isFinite(amount) || amount <= 0) {
       return NextResponse.json({ detail: "amount required" }, { status: 400 });
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     const sql = requireSql();
     await sql`
       INSERT INTO ai_credit_balances (tenant_id, employee_id, balance_credits)
-      VALUES (${tenant.id}, ${employeeId}, ${amount})
+      VALUES (${tenant.id}, ${employeeId || ""}, ${amount})
       ON CONFLICT (tenant_id, employee_id)
       DO UPDATE SET
         balance_credits = ai_credit_balances.balance_credits + ${amount},

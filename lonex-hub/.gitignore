@@ -9,6 +9,9 @@ out
 .env.vercel-copy
 .env.vercel-dev
 .env.lonexeim-check
+.env.prod.tmp
+.env.lonex-hub.tmp
+.env.neon.tmp
 *.tsbuildinfo
 next-env.d.ts
 

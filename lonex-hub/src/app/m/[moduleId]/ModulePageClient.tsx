@@ -6,6 +6,7 @@ import LogshieldModule from "@/modules/logshield/LogshieldModule";
 import HqSearchModule from "@/modules/hq/HqSearchModule";
 import WorkforceModule from "@/modules/workforce/WorkforceModule";
 import AiAssistantModule from "@/modules/ai-assistant/AiAssistantModule";
+import BillingModule from "@/modules/billing/BillingModule";
 import EmbedModule from "@/modules/EmbedModule";
 import GenericModule from "@/modules/GenericModule";
 
@@ -17,7 +18,6 @@ const EMBED_MODULES = [
   "web-drive",
   "notes",
   "support",
-  "billing",
 ] as const;
 
 export default function ModulePageClient({ moduleId }: { moduleId: string }) {
@@ -34,6 +34,8 @@ export default function ModulePageClient({ moduleId }: { moduleId: string }) {
       return <WorkforceModule />;
     case "ai-assistant":
       return <AiAssistantModule />;
+    case "billing":
+      return <BillingModule />;
     case "bidding":
       return <EmbedModule moduleId="bidding" fallbackPath="https://www.data.go.kr" />;
     default:

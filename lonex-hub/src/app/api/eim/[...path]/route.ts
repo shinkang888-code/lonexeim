@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   EIM_GATEWAY_MAP,
-  EIM_TOTAL_PATHS,
-  migratedPathCount,
   normalizeEimPath,
 } from "@/lib/eim/gateway-routes";
+import { handleEimCategoryStub } from "@/lib/eim/category-stub";
 import { invokeHubHandler } from "@/lib/eim/hub-handlers";
 import { resolveApiKey } from "@/lib/hq/resolve-api-key";
 import { resolveTenant } from "@/lib/tenant/resolve-tenant";
@@ -63,16 +62,7 @@ async function dispatch(req: NextRequest, ctx: RouteCtx) {
 
   const route = EIM_GATEWAY_MAP[normalized];
   if (!route) {
-    return NextResponse.json(
-      {
-        detail: "EIM path not yet migrated to Hub BFF",
-        eim_path: `/API/${normalized}`,
-        migrated: migratedPathCount(),
-        total: EIM_TOTAL_PATHS,
-        docs: "docs/eim-api-paths.txt",
-      },
-      { status: 501 }
-    );
+    return handleEimCategoryStub(req, normalized);
   }
 
   if (!route.methods.includes(req.method as (typeof route.methods)[number])) {
@@ -91,8 +81,8 @@ async function dispatch(req: NextRequest, ctx: RouteCtx) {
     }
   }
 
-  const direct = await invokeHubHandler(req, route.hubPath, body);
+  const direct = await invokeHubHandler(req, route.hubPath, body, req.method);
   if (direct) return direct;
 
-  return NextResponse.json({ detail: "Hub handler not found" }, { status: 500 });
+  return handleEimCategoryStub(req, normalized);
 }

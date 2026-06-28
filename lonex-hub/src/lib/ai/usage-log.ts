@@ -1,6 +1,9 @@
 import { randomUUID } from "crypto";
 import { getSql } from "@/lib/db";
 
+/** Org-level balance row — PK cannot use NULL employee_id in Postgres */
+export const TENANT_CREDIT_EMPLOYEE_ID = "";
+
 export type UsageLogInput = {
   tenantId: string;
   employeeId?: string | null;
@@ -40,7 +43,7 @@ export async function getCreditBalance(
 
     const orgRows = await sql`
       SELECT balance_credits FROM ai_credit_balances
-      WHERE tenant_id = ${tenantId} AND employee_id IS NULL
+      WHERE tenant_id = ${tenantId} AND employee_id = ${TENANT_CREDIT_EMPLOYEE_ID}
       LIMIT 1
     `;
     return orgRows[0] ? Number(orgRows[0].balance_credits) : 0;
@@ -70,7 +73,7 @@ export async function deductCredits(
     const orgUpdated = await sql`
       UPDATE ai_credit_balances
       SET balance_credits = balance_credits - ${amount}, updated_at = NOW()
-      WHERE tenant_id = ${tenantId} AND employee_id IS NULL
+      WHERE tenant_id = ${tenantId} AND employee_id = ${TENANT_CREDIT_EMPLOYEE_ID}
         AND balance_credits >= ${amount}
       RETURNING balance_credits
     `;
