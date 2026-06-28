@@ -36,7 +36,7 @@ async function handleMemberStub(req: NextRequest, subpath: string) {
 }
 
 async function forwardToHub(req: NextRequest, hubPath: string, body?: unknown) {
-  const url = new URL(hubPath, req.url);
+  const url = new URL(hubPath, req.nextUrl.origin);
   const headers = new Headers();
   req.headers.forEach((v, k) => {
     if (k.toLowerCase() === "host") return;
@@ -96,7 +96,7 @@ async function dispatch(req: NextRequest, ctx: RouteCtx) {
     );
   }
 
-  if (!route.methods.includes(req.method as "GET")) {
+  if (!route.methods.includes(req.method as (typeof route.methods)[number])) {
     return NextResponse.json({ detail: "Method not allowed" }, { status: 405 });
   }
 
