@@ -107,7 +107,7 @@ function Invoke-NeonMigrate {
             return
         }
         npm run db:migrate
-        if (Test-Path "scripts/migrate-vector.sql") {
+        npm run db:migrate:phase2
             Write-Host "Vector SQL: run manually if pgvector extension enabled"
         }
     } finally {
