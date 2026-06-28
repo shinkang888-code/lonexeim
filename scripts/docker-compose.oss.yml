@@ -11,14 +11,14 @@ x-restart: &restart
 services:
   # ── Core (가볍고 Hub 연동 우선) ──
   livekit:
-    profiles: [core, livekit, video-chat]
+    profiles: [core, livekit, video-chat, all]
     <<: *restart
     image: livekit/livekit-server:latest
     command: --dev --bind 0.0.0.0
     ports: ["7880:7880", "7881:7881", "7882:7882/udp"]
 
   mediacms-db:
-    profiles: [core, mediacms, media]
+    profiles: [core, mediacms, media, all]
     <<: *restart
     image: postgres:15-alpine
     environment:
@@ -33,7 +33,7 @@ services:
       retries: 5
 
   mediacms-redis:
-    profiles: [core, mediacms, media]
+    profiles: [core, mediacms, media, all]
     <<: *restart
     image: redis:7-alpine
     healthcheck:
@@ -43,7 +43,7 @@ services:
       retries: 3
 
   mediacms-migrate:
-    profiles: [core, mediacms, media]
+    profiles: [core, mediacms, media, all]
     image: mediacms/mediacms:latest
     environment:
       ENABLE_UWSGI: "no"
@@ -69,7 +69,7 @@ services:
         condition: service_healthy
 
   mediacms:
-    profiles: [core, mediacms, media]
+    profiles: [core, mediacms, media, all]
     <<: *restart
     image: mediacms/mediacms:latest
     ports: ["8800:80"]
@@ -91,7 +91,7 @@ services:
         condition: service_completed_successfully
 
   nextcloud:
-    profiles: [core, nextcloud, web-drive]
+    profiles: [core, nextcloud, web-drive, all]
     <<: *restart
     image: nextcloud:29-apache
     ports: ["8081:80"]
@@ -101,7 +101,7 @@ services:
     volumes: [nextcloud_data:/var/www/html]
 
   roundcube:
-    profiles: [core, roundcube, mail]
+    profiles: [core, roundcube, mail, all]
     <<: *restart
     image: roundcube/roundcubemail:latest
     ports: ["8080:80"]
@@ -111,7 +111,7 @@ services:
 
   # ── Chat / Support ──
   rocketchat-mongo:
-    profiles: [chat, rocketchat]
+    profiles: [chat, rocketchat, all]
     <<: *restart
     image: mongo:6
     command: ["--replSet", "rs0", "--bind_ip_all"]
@@ -123,7 +123,7 @@ services:
       retries: 5
 
   rocketchat-mongo-init:
-    profiles: [chat, rocketchat]
+    profiles: [chat, rocketchat, all]
     image: mongo:6
     depends_on:
       rocketchat-mongo:
@@ -143,7 +143,7 @@ services:
         exit 1
 
   rocketchat:
-    profiles: [chat, rocketchat]
+    profiles: [chat, rocketchat, all]
     <<: *restart
     image: rocket.chat:6.13.0
     environment:
@@ -155,23 +155,71 @@ services:
       rocketchat-mongo-init:
         condition: service_completed_successfully
 
+  # ── Calendar (Cal.com) ──
+  calcom-db:
+    profiles: [calendar, calcom, all]
+    <<: *restart
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: calcom
+      POSTGRES_PASSWORD: ${CALCOM_DB_PASSWORD:-calcom}
+      POSTGRES_DB: calendso
+    volumes: [calcom_pg:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d calendso -U calcom"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  calcom:
+    profiles: [calendar, calcom, all]
+    <<: *restart
+    image: calcom/cal.com:latest
+    ports: ["3005:3000"]
+    environment:
+      DATABASE_URL: postgresql://calcom:${CALCOM_DB_PASSWORD:-calcom}@calcom-db:5432/calendso
+      DATABASE_DIRECT_URL: postgresql://calcom:${CALCOM_DB_PASSWORD:-calcom}@calcom-db:5432/calendso
+      NEXTAUTH_SECRET: ${CALCOM_NEXTAUTH_SECRET:-lonex-calcom-nextauth-dev-secret-change-me-32}
+      CALENDSO_ENCRYPTION_KEY: ${CALCOM_ENCRYPTION_KEY:-lonexcalcomencryptdev24}
+      NEXT_PUBLIC_WEBAPP_URL: http://localhost:3005
+      NEXTAUTH_URL: http://localhost:3005
+      NEXT_PUBLIC_LICENSE_CONSENT: agree
+    depends_on:
+      calcom-db:
+        condition: service_healthy
+
   chatwoot-redis:
-    profiles: [support, chatwoot]
+    profiles: [support, chatwoot, all]
     <<: *restart
     image: redis:7-alpine
 
   chatwoot-db:
-    profiles: [support, chatwoot]
+    profiles: [support, chatwoot, all]
     <<: *restart
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     environment:
       POSTGRES_USER: chatwoot
       POSTGRES_PASSWORD: ${CHATWOOT_DB_PASSWORD:-chatwoot}
       POSTGRES_DB: chatwoot
     volumes: [chatwoot_pg:/var/lib/postgresql/data]
 
+  chatwoot-prepare:
+    profiles: [support, chatwoot, all]
+    image: chatwoot/chatwoot:latest
+    command: ["bundle", "exec", "rails", "db:chatwoot_prepare"]
+    restart: on-failure
+    environment:
+      FRONTEND_URL: http://localhost:3004
+      POSTGRES_HOST: chatwoot-db
+      POSTGRES_USERNAME: chatwoot
+      POSTGRES_PASSWORD: ${CHATWOOT_DB_PASSWORD:-chatwoot}
+      POSTGRES_DATABASE: chatwoot
+      REDIS_URL: redis://chatwoot-redis:6379
+      SECRET_KEY_BASE: ${CHATWOOT_SECRET:-lonex-chatwoot-secret-change-me}
+    depends_on: [chatwoot-db, chatwoot-redis]
+
   chatwoot:
-    profiles: [support, chatwoot]
+    profiles: [support, chatwoot, all]
     <<: *restart
     image: chatwoot/chatwoot:latest
     command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
@@ -184,16 +232,51 @@ services:
       POSTGRES_DATABASE: chatwoot
       REDIS_URL: redis://chatwoot-redis:6379
       SECRET_KEY_BASE: ${CHATWOOT_SECRET:-lonex-chatwoot-secret-change-me}
-    depends_on: [chatwoot-db, chatwoot-redis]
+    depends_on:
+      chatwoot-prepare:
+        condition: service_completed_successfully
+
+  # ── Billing (Akaunting) ──
+  akaunting-db:
+    profiles: [billing, akaunting, all]
+    <<: *restart
+    image: mariadb:10.11
+    environment:
+      MYSQL_DATABASE: akaunting
+      MYSQL_USER: akaunting
+      MYSQL_PASSWORD: ${AKAUNTING_DB_PASSWORD:-akaunting}
+      MYSQL_ROOT_PASSWORD: ${AKAUNTING_ROOT_PASSWORD:-akaunting-root}
+    volumes: [akaunting_db:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  akaunting:
+    profiles: [billing, akaunting, all]
+    <<: *restart
+    image: akaunting/akaunting:latest
+    ports: ["8082:80"]
+    environment:
+      LOCALE: ko-KR
+      DB_HOST: akaunting-db
+      DB_PORT: 3306
+      DB_DATABASE: akaunting
+      DB_USERNAME: akaunting
+      DB_PASSWORD: ${AKAUNTING_DB_PASSWORD:-akaunting}
+    depends_on:
+      akaunting-db:
+        condition: service_healthy
 
   # ── Notes ──
   outline-redis:
-    profiles: [notes, outline]
+    profiles: [notes, outline, all]
     <<: *restart
     image: redis:7-alpine
 
   outline-db:
-    profiles: [notes, outline]
+    profiles: [notes, outline, all]
     <<: *restart
     image: postgres:15-alpine
     environment:
@@ -203,26 +286,27 @@ services:
     volumes: [outline_pg:/var/lib/postgresql/data]
 
   outline:
-    profiles: [notes, outline]
+    profiles: [notes, outline, all]
     <<: *restart
     image: outlinewiki/outline:latest
     ports: ["3003:3000"]
     environment:
-      DATABASE_URL: postgres://outline:outline@outline-db:5432/outline
+      DATABASE_URL: postgres://outline:outline@outline-db:5432/outline?sslmode=disable
+      PGSSLMODE: disable
       REDIS_URL: redis://outline-redis:6379
-      SECRET_KEY: ${OUTLINE_SECRET:-lonex-outline-secret}
-      UTILS_SECRET: ${OUTLINE_UTILS_SECRET:-lonex-outline-utils}
+      SECRET_KEY: ${OUTLINE_SECRET:-17c20e54bd5390a69fce3650874afac508644979b47e576b077001c81b5bd5e1}
+      UTILS_SECRET: ${OUTLINE_UTILS_SECRET:-42c5b196d7e5a818eb409ac7dd5a1df0bf06afea26fc161a72df655f110dfcb7}
       URL: http://localhost:3003
     depends_on: [outline-db, outline-redis]
 
   # ── AI (heavy — profile dify) ──
   dify-redis:
-    profiles: [dify, ai-assistant]
+    profiles: [dify, ai-assistant, all]
     <<: *restart
     image: redis:7-alpine
 
   dify-db:
-    profiles: [dify, ai-assistant]
+    profiles: [dify, ai-assistant, all]
     <<: *restart
     image: postgres:15-alpine
     environment:
@@ -232,7 +316,7 @@ services:
     volumes: [dify_pg:/var/lib/postgresql/data]
 
   dify-api:
-    profiles: [dify, ai-assistant]
+    profiles: [dify, ai-assistant, all]
     <<: *restart
     image: langgenius/dify-api:1.4.0
     environment:
@@ -245,11 +329,15 @@ services:
       DB_DATABASE: dify
       REDIS_HOST: dify-redis
       REDIS_PORT: 6379
+      STORAGE_TYPE: opendal
+      OPENDAL_SCHEME: fs
+      OPENDAL_FS_ROOT: storage
+    volumes: [dify_storage:/app/api/storage]
     ports: ["5001:5001"]
     depends_on: [dify-db, dify-redis]
 
   dify-web:
-    profiles: [dify, ai-assistant]
+    profiles: [dify, ai-assistant, all]
     <<: *restart
     image: langgenius/dify-web:1.4.0
     environment:
@@ -259,10 +347,13 @@ services:
     depends_on: [dify-api]
 
 volumes:
+  dify_storage:
   dify_pg:
   mediacms_pg:
   mediacms_data:
   nextcloud_data:
   rocketchat_mongo:
   chatwoot_pg:
+  calcom_pg:
+  akaunting_db:
   outline_pg:

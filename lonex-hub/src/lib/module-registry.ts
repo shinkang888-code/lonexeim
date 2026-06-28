@@ -49,7 +49,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "MessageCircle",
     route: "/m/chat",
     description: "팀 채팅·라이브챗",
-    demo: true,
+    demo: false,
     oss: {
       github: "RocketChat/Rocket.Chat",
       license: "MIT",
@@ -65,7 +65,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "Mail",
     route: "/m/mail",
     description: "IMAP 웹메일",
-    demo: true,
+    demo: false,
     oss: {
       github: "roundcube/roundcubemail",
       license: "GPL-3.0",
@@ -81,7 +81,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "Calendar",
     route: "/m/calendar",
     description: "일정·예약",
-    demo: true,
+    demo: false,
     oss: {
       github: "calcom/cal.com",
       license: "MIT",
@@ -115,7 +115,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "Languages",
     route: "/m/borderless",
     description: "오디오→자막 + 다국어 번역",
-    demo: true,
+    demo: false,
     oss: {
       github: "jianchang512/pyvideotrans",
       license: "GPL-3.0",
@@ -136,7 +136,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "VideoIcon",
     route: "/m/video-chat",
     description: "WebRTC 화상회의",
-    demo: true,
+    demo: false,
     oss: {
       github: "livekit/livekit",
       license: "Apache-2.0",
@@ -153,7 +153,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "Gavel",
     route: "/m/bidding",
     description: "나라장터 입찰·낙찰",
-    demo: true,
+    demo: false,
     oss: {
       github: "kyj2294/naramarket-pro-MCP",
       license: "Custom",
@@ -200,7 +200,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "HardDrive",
     route: "/m/web-drive",
     description: "파일·동기화",
-    demo: true,
+    demo: false,
     oss: {
       github: "nextcloud/server",
       license: "AGPL-3.0",
@@ -216,7 +216,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "PenLine",
     route: "/m/notes",
     description: "팀 위키·노트",
-    demo: true,
+    demo: false,
     oss: {
       github: "outline/outline",
       license: "BSL-1.1",
@@ -233,7 +233,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "Headphones",
     route: "/m/support",
     description: "라이브챗·티켓",
-    demo: true,
+    demo: false,
     oss: {
       github: "chatwoot/chatwoot",
       license: "MIT",
@@ -249,7 +249,7 @@ export const MODULE_REGISTRY: HubModuleDef[] = [
     icon: "DollarSign",
     route: "/m/billing",
     description: "청구·수납",
-    demo: true,
+    demo: false,
     oss: {
       github: "akaunting/akaunting",
       license: "BSL-1.1",

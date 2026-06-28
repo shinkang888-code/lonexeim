@@ -13,14 +13,16 @@ const TAB_LABELS: Record<Locale, string> = {
   vi: "VI",
 };
 
-export function LanguageToggle() {
+export function LanguageToggle({ compact = false }: { compact?: boolean }) {
   const locale = useLocaleStore((s) => s.locale);
   const setLocale = useLocaleStore((s) => s.setLocale);
   const t = useT();
 
   return (
     <div
-      className="flex items-center gap-0.5 rounded-full border border-neutral-200 bg-white p-0.5 shadow-sm"
+      className={`flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-[var(--hub-color-border,#e2e8f0)] bg-white p-0.5 shadow-sm ${
+        compact ? "w-full justify-start sm:w-auto" : ""
+      }`}
       role="tablist"
       aria-label={t.language[locale]}
     >
@@ -34,11 +36,9 @@ export function LanguageToggle() {
             aria-selected={active}
             title={t.language[code]}
             onClick={() => setLocale(code)}
-            className={`min-w-[2rem] rounded-full px-2 py-1 text-[10px] font-semibold transition ${
-              active
-                ? "bg-neutral-900 text-white"
-                : "text-neutral-600 hover:bg-neutral-100"
-            }`}
+            className={`shrink-0 rounded-full font-semibold transition ${
+              compact ? "min-h-9 min-w-[2.5rem] px-2.5 text-[11px]" : "min-h-9 min-w-[2.25rem] px-2.5 text-xs"
+            } ${active ? "bg-[var(--hub-color-primary,#4f46e5)] text-white shadow-sm" : "text-neutral-600 hover:bg-neutral-100"}`}
           >
             {TAB_LABELS[code]}
           </button>

@@ -1,5 +1,82 @@
 @import "tailwindcss";
 
+:root {
+  --hub-dock-height: 5rem;
+  --hub-bg: #eef1f6;
+  /* figma-sync:start */
+  --hub-color-bg: #eef1f6;
+  --hub-color-surface: #ffffff;
+  --hub-color-primary: #4f46e5;
+  --hub-color-primary-dark: #3730a3;
+  --hub-color-accent: #0ea5e9;
+  --hub-color-text: #0f172a;
+  --hub-color-text-muted: #64748b;
+  --hub-color-border: #e2e8f0;
+  --hub-color-communication: #2563eb;
+  --hub-color-work: #7c3aed;
+  --hub-color-info: #059669;
+  --hub-color-support: #d97706;
+  --hub-color-hero-from: #0f172a;
+  --hub-color-hero-via: #1e1b4b;
+  --hub-color-hero-to: #312e81;
+  --hub-hero-overlay: linear-gradient(105deg, rgba(15,23,42,0.92) 0%, rgba(30,27,75,0.78) 48%, rgba(49,46,129,0.45) 100%);
+/* figma-sync:end */
+}
+
 body {
   font-family: "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  color: var(--hub-color-text, #0f172a);
+  background-color: var(--hub-color-bg, #eef1f6);
+  background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(14, 165, 233, 0.08), transparent);
+  min-height: 100dvh;
+}
+
+.hub-hero-overlay {
+  background: var(--hub-hero-overlay);
+}
+
+.hub-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+.hub-search-input {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  outline: none;
+}
+
+.hub-search-input:focus {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+.hub-favorites-empty {
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.85));
+}
+
+.pb-hub-dock {
+  padding-bottom: calc(var(--hub-dock-height) + env(safe-area-inset-bottom, 0px));
+}
+
+.hub-dock-bar {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+.hub-dock-scroll {
+  scrollbar-width: none;
+}
+
+.hub-dock-scroll::-webkit-scrollbar {
+  display: none;
 }

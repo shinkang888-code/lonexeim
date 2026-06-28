@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE = path.join(ROOT, "scripts", "docker-oss.env");
+const TUNNEL = path.join(ROOT, "scripts", "docker-oss.tunnel.env");
 const TARGET = path.join(ROOT, "lonex-hub", ".env.local");
 
 function parseEnv(content) {
@@ -32,6 +33,13 @@ if (!fs.existsSync(SOURCE)) {
 }
 
 const source = parseEnv(fs.readFileSync(SOURCE, "utf8"));
+if (fs.existsSync(TUNNEL)) {
+  const tunnel = parseEnv(fs.readFileSync(TUNNEL, "utf8"));
+  for (const [k, v] of tunnel) {
+    if (k.startsWith("NEXT_PUBLIC_")) source.set(k, v);
+  }
+  console.log(`Merged tunnel URLs from ${TUNNEL}`);
+}
 const ossKeys = [...source.keys()].filter((k) => k.startsWith("NEXT_PUBLIC_"));
 
 if (ossKeys.length === 0) {

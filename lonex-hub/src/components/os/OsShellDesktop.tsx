@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import { Home, X } from "lucide-react";
 import { MODULE_REGISTRY } from "@/lib/module-registry";
+import { MODULE_ICONS } from "@/components/hub/module-icons";
 import { DOCK_Z, useOsStore, WIN_Z_BASE } from "@/store/os-store";
 import { OsWindowRouter } from "./OsWindowRouter";
 import { UnifiedSearch } from "./UnifiedSearch";
@@ -13,6 +15,8 @@ const LAUNCHER_APPS = visibleModules(
   MODULE_REGISTRY.filter((m) => !m.demo),
   ["all"]
 ).map((m) => m.id);
+
+const IS_DEV = process.env.NODE_ENV === "development";
 
 export function OsShellDesktop() {
   const { windows, openWindow, closeWindow, focusWindow, moveWindow } = useOsStore();
@@ -59,17 +63,20 @@ export function OsShellDesktop() {
       <div className="relative z-[1] flex flex-wrap gap-3 p-6 pt-4">
         {LAUNCHER_APPS.map((id) => {
           const mod = MODULE_REGISTRY.find((m) => m.id === id)!;
+          const Icon = MODULE_ICONS[mod.icon] ?? MODULE_ICONS.Bot;
           return (
             <button
               key={id}
               type="button"
               onClick={() => launch(id)}
-              className="flex w-20 flex-col items-center gap-1 rounded-xl p-2 hover:bg-white/60"
+              className="flex min-h-[88px] w-[5.5rem] flex-col items-center gap-2 rounded-2xl p-2 transition hover:bg-white/70"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow text-lg font-bold text-neutral-800">
-                {mod.name.slice(0, 1)}
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm">
+                <Icon className="h-6 w-6 text-neutral-800" strokeWidth={1.5} />
               </span>
-              <span className="text-center text-[10px] font-medium">{mod.name}</span>
+              <span className="line-clamp-2 text-center text-xs font-medium leading-tight text-neutral-800">
+                {mod.name}
+              </span>
             </button>
           );
         })}
@@ -93,14 +100,19 @@ export function OsShellDesktop() {
             }}
           >
             <span>{w.title}</span>
-            <button type="button" className="text-white/80 hover:text-white" onClick={() => closeWindow(w.id)}>
-              ✕
+            <button
+              type="button"
+              aria-label="Close window"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-white/80 hover:bg-white/10 hover:text-white"
+              onClick={() => closeWindow(w.id)}
+            >
+              <X className="h-4 w-4" />
             </button>
           </div>
           <div className="min-h-0 flex-1 overflow-auto bg-white">
             <OsWindowRouter windowId={w.id} moduleId={w.moduleId} title={w.title} initialPath={w.path} />
           </div>
-          {w.moduleId === "ai-assistant" && (
+          {IS_DEV && w.moduleId === "ai-assistant" && (
             <div className="border-t bg-neutral-50 p-2 text-center">
               <button
                 type="button"
@@ -116,18 +128,22 @@ export function OsShellDesktop() {
 
       {/* 도크 (123) + 통합검색 (124) */}
       <div
-        className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-2xl border bg-white/90 px-3 py-2 shadow-lg backdrop-blur"
+        className="absolute bottom-3 left-1/2 flex max-w-[min(100%,48rem)] -translate-x-1/2 items-center gap-2 overflow-x-auto rounded-2xl border bg-white/90 px-3 py-2 shadow-lg backdrop-blur"
         style={{ zIndex: DOCK_Z }}
       >
-        <Link href="/" className="rounded-lg px-2 py-1 text-xs font-medium hover:bg-neutral-100">
-          🏠
+        <Link
+          href="/"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl hover:bg-neutral-100"
+          aria-label="Hub home"
+        >
+          <Home className="h-5 w-5 text-neutral-700" />
         </Link>
         {windows.map((w) => (
           <button
             key={w.id}
             type="button"
             onClick={() => focusWindow(w.id)}
-            className="max-w-[72px] truncate rounded-lg bg-neutral-900 px-2 py-1 text-[10px] text-white"
+            className="max-w-[5rem] shrink-0 truncate rounded-xl bg-neutral-900 px-3 py-2 text-xs font-medium text-white"
           >
             {w.title}
           </button>
@@ -135,9 +151,11 @@ export function OsShellDesktop() {
         <UnifiedSearch onOpen={launch} />
       </div>
 
-      <p className="absolute bottom-14 left-4 text-[10px] text-neutral-500">
-        z-base={WIN_Z_BASE} · 앱: {LAUNCHER_APPS.length}개
-      </p>
+      {IS_DEV && (
+        <p className="absolute bottom-14 left-4 text-[10px] text-neutral-400">
+          z-base={WIN_Z_BASE} · apps={LAUNCHER_APPS.length}
+        </p>
+      )}
     </div>
   );
 }

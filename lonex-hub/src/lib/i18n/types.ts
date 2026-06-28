@@ -20,6 +20,20 @@ export interface Messages {
     emptyLine1: string;
     emptyLine2: string;
   };
+  dashboard: {
+    greeting: string;
+    subtitle: string;
+    searchPlaceholder: string;
+    modules: string;
+    connected: string;
+    quickOs: string;
+    quickOsSub: string;
+    quickAi: string;
+    quickAiSub: string;
+    searchResults: string;
+    noResults: string;
+    appsCount: string;
+  };
   categories: Record<ModuleCategoryKey, string>;
   modules: Record<string, ModuleStrings>;
   dock: { home: string; close: string };

@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ModulePageHeader, OssBadge } from "@/components/hub/ModuleChrome";
+import { HUB_DOCK_PAD, HubButton, hubModuleShellCol } from "@/components/hub/hub-ui";
 import { syncToHq } from "@/lib/workforce-sync";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 export default function AiAssistantModule() {
+  const difyUrl = process.env.NEXT_PUBLIC_DIFY_URL ?? "";
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
@@ -17,6 +19,7 @@ export default function AiAssistantModule() {
   const [mode, setMode] = useState<"chat" | "legal" | "pii">("chat");
   const [loading, setLoading] = useState(false);
   const [aiReady, setAiReady] = useState<boolean | null>(null);
+  const [panel, setPanel] = useState<"hub" | "dify">("hub");
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,7 +78,7 @@ export default function AiAssistantModule() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f5f5f5] pb-28">
+    <div className={`${hubModuleShellCol} ${HUB_DOCK_PAD}`}>
       <ModulePageHeader
         title="AI 비서"
         action={
@@ -86,6 +89,33 @@ export default function AiAssistantModule() {
       />
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col p-4">
         <OssBadge moduleId="ai-assistant" />
+        {difyUrl && (
+          <div className="mb-3 flex gap-2">
+            <HubButton
+              size="sm"
+              variant={panel === "hub" ? "primary" : "secondary"}
+              onClick={() => setPanel("hub")}
+            >
+              Hub AI (HF)
+            </HubButton>
+            <HubButton
+              size="sm"
+              variant={panel === "dify" ? "primary" : "secondary"}
+              onClick={() => setPanel("dify")}
+            >
+              Dify OSS
+            </HubButton>
+          </div>
+        )}
+        {panel === "dify" && difyUrl ? (
+          <iframe
+            title="Dify"
+            src={difyUrl}
+            className="min-h-[70vh] flex-1 rounded-xl border bg-white"
+            allow="microphone; clipboard-write"
+          />
+        ) : (
+          <>
         <div className="mb-3 flex gap-2">
           <select
             value={mode}
@@ -112,21 +142,18 @@ export default function AiAssistantModule() {
         </div>
         <div className="flex gap-2">
           <input
-            className="flex-1 rounded-xl border px-3 py-2 text-sm"
+            className="min-h-11 flex-1 rounded-xl border border-neutral-200 px-3 text-sm"
             placeholder={mode === "pii" ? "PII 마스킹할 텍스트..." : "메시지 입력..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
           />
-          <button
-            type="button"
-            disabled={loading}
-            onClick={send}
-            className="rounded-xl bg-neutral-900 px-4 py-2 text-sm text-white disabled:opacity-50"
-          >
+          <HubButton disabled={loading} onClick={send}>
             {loading ? "…" : "전송"}
-          </button>
+          </HubButton>
         </div>
+          </>
+        )}
       </div>
     </div>
   );

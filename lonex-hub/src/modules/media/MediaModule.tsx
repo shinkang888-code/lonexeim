@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { HubTabBar, ModulePageHeader, OssBadge } from "@/components/hub/ModuleChrome";
+import { HUB_DOCK_PAD, HubButton, hubModuleShell } from "@/components/hub/hub-ui";
 import { syncToHq } from "@/lib/workforce-sync";
 
 const TABS = [
@@ -12,6 +13,7 @@ const TABS = [
 ];
 
 export default function MediaModule() {
+  const cmsUrl = process.env.NEXT_PUBLIC_MEDIACMS_URL ?? "";
   const [tab, setTab] = useState("workflow");
   const [subtitle, setSubtitle] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,17 +39,27 @@ export default function MediaModule() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] pb-28">
+    <div className={`${hubModuleShell} ${HUB_DOCK_PAD}`}>
       <ModulePageHeader
         title="콘텐츠 제작"
-        action={<span className="rounded-lg border px-2 py-1 text-xs text-neutral-600">Windows 앱</span>}
+        action={
+          <span className="inline-flex min-h-9 items-center rounded-xl border border-neutral-200 px-3 text-xs font-medium text-neutral-600">
+            Windows 앱
+          </span>
+        }
       />
       <HubTabBar tabs={TABS} active={tab} onChange={setTab} />
-      <div className="mx-auto max-w-3xl p-4">
+      <div className="mx-auto max-w-3xl space-y-4 p-3 sm:p-4">
         <OssBadge moduleId="media" />
 
+        {cmsUrl && (
+          <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+            <iframe title="MediaCMS" src={cmsUrl} className="min-h-[40vh] w-full" />
+          </div>
+        )}
+
         {(tab === "cut" || tab === "edit") && (
-          <div className="mb-4 rounded-xl border bg-white p-4">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
             <p className="text-sm text-neutral-600">
               LONEX EIM 데스크톱 앱에서 컷편집·종합편집을 실행하세요.
             </p>
@@ -55,25 +67,22 @@ export default function MediaModule() {
         )}
 
         {tab === "workflow" && (
-          <div className="space-y-4 rounded-xl border bg-white p-4">
-            <p className="text-sm text-neutral-700">MediaCMS + Whisper 자막 파이프라인 (Hub API)</p>
-            <input ref={fileRef} type="file" accept="audio/*,video/*" className="text-sm" />
-            <button
-              type="button"
-              disabled={busy}
-              onClick={generateSubtitle}
-              className="rounded-lg bg-neutral-900 px-4 py-2 text-sm text-white disabled:opacity-50"
-            >
+          <div className="space-y-4 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+            <p className="text-sm font-medium text-neutral-800">MediaCMS + Whisper 자막 파이프라인</p>
+            <input ref={fileRef} type="file" accept="audio/*,video/*" className="w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-neutral-100 file:px-3 file:py-2" />
+            <HubButton disabled={busy} onClick={generateSubtitle}>
               {busy ? "처리 중…" : "자막 생성"}
-            </button>
+            </HubButton>
             {subtitle && (
-              <pre className="max-h-60 overflow-auto rounded-lg bg-neutral-50 p-3 text-xs">{subtitle}</pre>
+              <pre className="max-h-60 overflow-auto rounded-xl bg-neutral-50 p-3 text-xs leading-relaxed text-neutral-800">
+                {subtitle}
+              </pre>
             )}
           </div>
         )}
 
         {tab === "filming" && (
-          <div className="rounded-xl border bg-white p-4 text-sm text-neutral-600">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600 shadow-sm">
             촬영기는 LONEX EIM Windows 앱에서 실행됩니다.
           </div>
         )}

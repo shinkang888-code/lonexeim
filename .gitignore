@@ -2,3 +2,6 @@
 _asar_extract/main/app/web/img/fileBrowser/
 _asar_extract/main/app/web/img/video/
 _asar_extract/main/package-lock.json
+scripts/docker-oss.tunnel.env
+scripts/figma.env
+scripts/figma.config.json

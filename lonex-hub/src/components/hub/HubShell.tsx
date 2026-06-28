@@ -1,152 +1,58 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import {
-  Bot,
-  Calendar,
-  DollarSign,
-  Gavel,
-  HardDrive,
-  Headphones,
-  Languages,
-  Mail,
-  MessageCircle,
-  PenLine,
-  Search,
-  Settings,
-  Shield,
-  Video,
-  VideoIcon,
-  type LucideIcon,
-} from "lucide-react";
+import { Home, X, type LucideIcon } from "lucide-react";
+import { HubDashboard } from "@/components/hub/HubDashboard";
 import { LanguageToggle } from "@/components/hub/LanguageToggle";
-import { MODULE_REGISTRY, type HubModuleDef } from "@/lib/module-registry";
-import { useCategoryLabel, useModuleStrings, useT } from "@/lib/i18n/use-translations";
-import type { ModuleCategoryKey } from "@/lib/i18n/types";
+import { HubHeaderLink } from "@/components/hub/hub-ui";
+import { MODULE_ICONS } from "@/components/hub/module-icons";
+import { MODULE_REGISTRY } from "@/lib/module-registry";
+import { useModuleStrings, useT } from "@/lib/i18n/use-translations";
 import { useHubStore } from "@/store/hub-store";
 
-const ICONS: Record<string, LucideIcon> = {
-  Bot,
-  MessageCircle,
-  Mail,
-  Calendar,
-  Video,
-  Languages,
-  VideoIcon,
-  Gavel,
-  HardDrive,
-  PenLine,
-  Headphones,
-  DollarSign,
-  Shield,
-  Search,
-  Settings,
-};
-
-function AppTile({ mod }: { mod: HubModuleDef }) {
-  const router = useRouter();
-  const openModule = useHubStore((s) => s.openModule);
-  const { name } = useModuleStrings(mod.id);
-  const Icon = ICONS[mod.icon] ?? Bot;
-
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        openModule({
-          id: mod.id,
-          moduleId: mod.id,
-          label: name,
-          route: mod.route,
-          closable: true,
-        });
-        router.push(mod.route);
-      }}
-      className="flex flex-col items-center gap-2 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition hover:shadow-md"
-    >
-      <Icon className="h-7 w-7 text-neutral-900" strokeWidth={1.5} />
-      <span className="text-center text-xs font-medium text-neutral-800">{name}</span>
-    </button>
-  );
-}
-
 export function HubLauncher() {
-  const t = useT();
-  const sections: ModuleCategoryKey[] = ["communication", "work", "info", "support"];
-
-  return (
-    <div className="mx-auto max-w-5xl space-y-8 px-4 pb-32 pt-4">
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-neutral-500">★ {t.favorites.title}</h2>
-          <button type="button" className="text-xs text-neutral-500 underline">
-            {t.favorites.edit}
-          </button>
-        </div>
-        <div className="rounded-2xl border border-dashed border-neutral-300 bg-white/60 p-8 text-center text-sm text-neutral-500">
-          {t.favorites.emptyLine1}
-          <br />
-          {t.favorites.emptyLine2}
-        </div>
-      </section>
-
-      {sections.map((cat) => {
-        const items = MODULE_REGISTRY.filter((m) => m.category === cat);
-        if (!items.length) return null;
-        return (
-          <CategorySection key={cat} category={cat} items={items} />
-        );
-      })}
-    </div>
-  );
-}
-
-function CategorySection({
-  category,
-  items,
-}: {
-  category: ModuleCategoryKey;
-  items: HubModuleDef[];
-}) {
-  const label = useCategoryLabel(category);
-  return (
-    <section>
-      <h2 className="mb-3 text-sm font-semibold text-neutral-500">{label}</h2>
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
-        {items.map((mod) => (
-          <AppTile key={mod.id} mod={mod} />
-        ))}
-      </div>
-    </section>
-  );
+  return <HubDashboard />;
 }
 
 export function HubHeader() {
   const t = useT();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-neutral-200 bg-[#f5f5f5]">
-      <div className="flex items-center justify-between px-4 py-3">
-        <button type="button" className="rounded-lg p-2 hover:bg-neutral-200" aria-label={t.header.menu}>
-          <span className="block h-0.5 w-5 bg-neutral-800" />
-          <span className="mt-1 block h-0.5 w-5 bg-neutral-800" />
-          <span className="mt-1 block h-0.5 w-5 bg-neutral-800" />
-        </button>
-        <Link href="/" className="text-lg font-bold tracking-widest text-neutral-900">
-          LONEX
+    <header className="hub-header sticky top-0 z-40 border-b border-[var(--hub-color-border,#e2e8f0)] bg-white/90 shadow-sm backdrop-blur-xl">
+      <div className="mx-auto flex max-w-5xl items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5">
+        <Link
+          href="/"
+          className="flex min-h-10 min-w-10 shrink-0 items-center gap-2 rounded-xl pr-1 sm:min-w-0"
+          aria-label="Lonex Hub home"
+        >
+          <Image
+            src="/images/hub-logo.svg"
+            alt=""
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-lg shadow-sm"
+          />
+          <span className="hidden text-sm font-bold tracking-[0.16em] text-neutral-900 sm:inline">
+            LONEX
+          </span>
         </Link>
-        <div className="flex items-center gap-3">
-          <Link href="/os_dashboard" className="text-xs text-neutral-600 underline">
-            OS Shell
-          </Link>
-          <Link href="/services" className="text-xs text-neutral-600 underline">
+
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <div className="hidden sm:block">
+            <LanguageToggle compact />
+          </div>
+          <HubHeaderLink href="/os_dashboard" variant="secondary">
+            {t.dashboard.quickOs}
+          </HubHeaderLink>
+          <HubHeaderLink href="/services" variant="primary">
             {t.header.ai}
-          </Link>
+          </HubHeaderLink>
         </div>
       </div>
-      <div className="flex justify-center border-t border-neutral-100 px-4 py-2">
-        <LanguageToggle />
+      <div className="border-t border-neutral-100/90 px-3 py-2 sm:hidden">
+        <LanguageToggle compact />
       </div>
     </header>
   );
@@ -158,29 +64,34 @@ export function HubDock() {
   const t = useT();
 
   return (
-    <nav className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-end gap-1 rounded-full border border-neutral-200 bg-white px-3 py-2 shadow-lg">
-      {tabs.map((tab) => (
-        <DockTabItem
-          key={tab.id}
-          tab={tab}
-          active={tab.id === activeTabId}
-          closeLabel={t.dock.close}
-          homeLabel={t.dock.home}
-          onActivate={() => {
-            setActive(tab.id);
-            router.push(tab.route);
-          }}
-          onClose={() => {
-            const wasActive = tab.id === activeTabId;
-            closeTab(tab.id);
-            if (wasActive) {
-              const remaining = useHubStore.getState().tabs;
-              const next = remaining.find((x) => x.id === useHubStore.getState().activeTabId);
-              router.push(next?.route ?? "/");
-            }
-          }}
-        />
-      ))}
+    <nav
+      className="hub-dock-bar fixed inset-x-0 bottom-0 z-50 border-t border-[var(--hub-color-border,#e2e8f0)] bg-white/95 shadow-[0_-8px_32px_rgba(15,23,42,0.08)] backdrop-blur-lg"
+      aria-label={t.dock.home}
+    >
+      <div className="hub-dock-scroll mx-auto flex max-w-5xl items-end gap-0.5 overflow-x-auto px-2 pt-2 sm:justify-center sm:gap-1 sm:px-4">
+        {tabs.map((tab) => (
+          <DockTabItem
+            key={tab.id}
+            tab={tab}
+            active={tab.id === activeTabId}
+            closeLabel={t.dock.close}
+            homeLabel={t.dock.home}
+            onActivate={() => {
+              setActive(tab.id);
+              router.push(tab.route);
+            }}
+            onClose={() => {
+              const wasActive = tab.id === activeTabId;
+              closeTab(tab.id);
+              if (wasActive) {
+                const remaining = useHubStore.getState().tabs;
+                const next = remaining.find((x) => x.id === useHubStore.getState().activeTabId);
+                router.push(next?.route ?? "/");
+              }
+            }}
+          />
+        ))}
+      </div>
     </nav>
   );
 }
@@ -200,60 +111,50 @@ function DockTabItem({
   onActivate: () => void;
   onClose: () => void;
 }) {
+  const mod = MODULE_REGISTRY.find((m) => m.id === tab.moduleId);
   const { name } = useModuleStrings(tab.moduleId);
-  const label = tab.moduleId === "hub" ? homeLabel : (name || tab.label).slice(0, 6);
+  const label = tab.moduleId === "hub" ? homeLabel : name || tab.label;
+  const Icon: LucideIcon =
+    tab.moduleId === "hub" ? Home : MODULE_ICONS[mod?.icon ?? "Bot"] ?? Home;
+  const shortLabel = label.length > 8 ? `${label.slice(0, 7)}…` : label;
 
   return (
-    <DockTabButton
-      tab={tab}
-      active={active}
-      label={label}
-      closeLabel={closeLabel}
-      onActivate={onActivate}
-      onClose={onClose}
-    />
-  );
-}
-
-function DockTabButton({
-  tab,
-  active,
-  label,
-  closeLabel,
-  onActivate,
-  onClose,
-}: {
-  tab: { id: string; closable: boolean };
-  active: boolean;
-  label: string;
-  closeLabel: string;
-  onActivate: () => void;
-  onClose: () => void;
-}) {
-  return (
-    <div className="relative">
-      {tab.closable && (
-        <button
-          type="button"
-          aria-label={closeLabel}
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          className="absolute -right-1 -top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-neutral-300 text-[10px] text-white"
-        >
-          ×
-        </button>
-      )}
+    <div className="group relative shrink-0 pb-1">
       <button
         type="button"
         onClick={onActivate}
-        className={`flex min-w-[44px] flex-col items-center rounded-xl px-2 py-1 text-[10px] ${
-          active ? "bg-neutral-900 text-white" : "text-neutral-700"
+        title={label}
+        className={`relative flex min-h-[3.25rem] min-w-[4rem] max-w-[5rem] flex-col items-center justify-center gap-0.5 rounded-2xl px-2.5 py-1.5 text-[11px] font-medium leading-tight transition sm:min-w-[4.5rem] sm:text-xs ${
+          active
+            ? "bg-[var(--hub-color-primary,#4f46e5)] text-white shadow-md"
+            : "text-neutral-600 hover:bg-neutral-100"
         }`}
       >
-        <span className="text-base">●</span>
-        {label}
+        {tab.closable && (
+          <span
+            role="button"
+            tabIndex={0}
+            aria-label={closeLabel}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }
+            }}
+            className={`absolute -right-1 -top-1 z-10 flex h-6 w-6 items-center justify-center rounded-full text-white shadow ${
+              active ? "bg-neutral-900/80 hover:bg-neutral-900" : "bg-neutral-600 hover:bg-neutral-800"
+            }`}
+          >
+            <X className="h-3 w-3" strokeWidth={2.5} />
+          </span>
+        )}
+        <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2 : 1.75} />
+        <span className="w-full truncate text-center">{shortLabel}</span>
       </button>
     </div>
   );

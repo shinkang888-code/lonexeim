@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { OssBadge, ModulePageHeader } from "@/components/hub/ModuleChrome";
+import { HUB_DOCK_PAD, HubButton, hubModuleShell } from "@/components/hub/hub-ui";
 import { syncToHq } from "@/lib/workforce-sync";
 
 const LANGS = ["KO", "EN", "ZH", "JA", "VI", "RU"];
@@ -68,48 +69,45 @@ export default function BorderlessModule() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] pb-28">
+    <div className={`${hubModuleShell} ${HUB_DOCK_PAD}`}>
       <ModulePageHeader title="borderless" />
-      <div className="mx-auto max-w-lg p-4">
+      <div className="mx-auto max-w-lg space-y-4 p-3 sm:p-4">
         <OssBadge moduleId="borderless" />
-        <p className="mb-4 text-sm text-neutral-600">Whisper(ko) STT + NLLB 다국어 번역 → 본사 HQ 업로드</p>
+        <p className="text-sm text-neutral-600">Whisper(ko) STT + NLLB 다국어 번역 → 본사 HQ 업로드</p>
 
-        <input ref={fileRef} type="file" accept="audio/*,video/*" className="mb-3 w-full text-sm" />
-        <div className="mb-4 flex gap-2">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={handleTranscribe}
-            className="flex-1 rounded-xl bg-neutral-900 py-2 text-sm text-white disabled:opacity-50"
-          >
+        <input
+          ref={fileRef}
+          type="file"
+          accept="audio/*,video/*"
+          className="w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-neutral-100 file:px-3 file:py-2"
+        />
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <HubButton disabled={busy} onClick={handleTranscribe} className="flex-1">
             {busy ? "처리 중…" : "자막 추출 (Whisper)"}
-          </button>
-          <button
-            type="button"
-            disabled={busy || !result}
-            onClick={handleTranslate}
-            className="rounded-xl border px-4 py-2 text-sm disabled:opacity-50"
-          >
+          </HubButton>
+          <HubButton disabled={busy || !result} variant="secondary" onClick={handleTranslate}>
             EN 번역
-          </button>
+          </HubButton>
         </div>
-        {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
         {result && (
           <textarea
-            className="mb-4 min-h-[120px] w-full rounded-xl border p-3 text-sm"
+            className="min-h-[140px] w-full rounded-2xl border border-neutral-200 p-3 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-neutral-900"
             value={result}
             onChange={(e) => setResult(e.target.value)}
           />
         )}
 
-        <p className="mb-2 text-xs text-neutral-500">데모 프로젝트</p>
         <article className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
-          <h3 className="font-semibold">정몽자목소리녹음5분</h3>
-          <div className="mt-3 flex flex-wrap gap-1">
+          <h3 className="font-semibold text-neutral-900">정몽자목소리녹음5분</h3>
+          <p className="mt-1 text-xs text-neutral-500">데모 프로젝트</p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
             {LANGS.map((l) => (
               <span
                 key={l}
-                className={`rounded-full px-2 py-0.5 text-xs ${l === "KO" ? "bg-neutral-900 text-white" : "bg-neutral-100"}`}
+                className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                  l === "KO" ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-700"
+                }`}
               >
                 {l === "KO" ? "✓ " : ""}
                 {l}

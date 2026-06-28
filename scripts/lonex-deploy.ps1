@@ -156,6 +156,10 @@ switch ($Action) {
             if (Test-Path $DockerScript) { Invoke-DockerCore }
         }
         Invoke-RenderValidate
+        $renderDeploy = Join-Path $PSScriptRoot "render-deploy.ps1"
+        if ((Test-Path $renderDeploy) -and -not $SkipRender) {
+            pwsh -NoProfile -File $renderDeploy -Action deploy -SkipVercel
+        }
         if (-not $SkipVercel) { Invoke-VercelDeploy }
         Write-Step "Done"
         Write-Host "Hub: https://lonexeim-hub.vercel.app"

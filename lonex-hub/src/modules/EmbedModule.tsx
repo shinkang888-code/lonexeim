@@ -1,6 +1,7 @@
 "use client";
 
 import { ModulePageHeader, OssBadge } from "@/components/hub/ModuleChrome";
+import { HUB_DOCK_PAD, HubButton, hubModuleShellCol } from "@/components/hub/hub-ui";
 import { useModuleStrings, useT } from "@/lib/i18n/use-translations";
 import { syncToHq } from "@/lib/workforce-sync";
 
@@ -9,7 +10,7 @@ const ENV_KEYS: Record<string, string> = {
   chat: "NEXT_PUBLIC_ROCKETCHAT_URL",
   mail: "NEXT_PUBLIC_ROUNDCUBE_URL",
   calendar: "NEXT_PUBLIC_CALCOM_URL",
-  "video-chat": "NEXT_PUBLIC_LIVEKIT_URL",
+  "video-chat": "NEXT_PUBLIC_LIVEKIT_MEET_URL",
   "web-drive": "NEXT_PUBLIC_NEXTCLOUD_URL",
   notes: "NEXT_PUBLIC_OUTLINE_URL",
   support: "NEXT_PUBLIC_CHATWOOT_URL",
@@ -18,16 +19,8 @@ const ENV_KEYS: Record<string, string> = {
   logshield: "NEXT_PUBLIC_LOGSHIELD_CONSOLE_URL",
 };
 
-/** docker-compose profile hint per module */
-const DOCKER_PROFILES: Record<string, string> = {
-  "ai-assistant": "dify",
-  chat: "chat",
-  mail: "core",
-  "video-chat": "core",
-  "web-drive": "core",
-  media: "core",
-  notes: "notes",
-  support: "support",
+const ENV_FALLBACK: Record<string, string> = {
+  "video-chat": "NEXT_PUBLIC_LIVEKIT_URL",
 };
 
 export default function EmbedModule({
@@ -40,9 +33,11 @@ export default function EmbedModule({
   const t = useT();
   const { name } = useModuleStrings(moduleId);
   const envKey = ENV_KEYS[moduleId];
-  const dockerProfile = DOCKER_PROFILES[moduleId] ?? moduleId;
   const embedUrl =
     (typeof process !== "undefined" && envKey && process.env[envKey]) ||
+    (typeof process !== "undefined" &&
+      ENV_FALLBACK[moduleId] &&
+      process.env[ENV_FALLBACK[moduleId]]) ||
     fallbackPath ||
     "";
 
@@ -56,44 +51,34 @@ export default function EmbedModule({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f5f5f5] pb-28">
+    <div className={`${hubModuleShellCol} ${HUB_DOCK_PAD}`}>
       <ModulePageHeader
         title={name}
         action={
-          <button
-            type="button"
-            onClick={handleSyncDemo}
-            className="rounded-lg bg-neutral-900 px-3 py-1 text-xs text-white"
-          >
+          <HubButton size="sm" onClick={handleSyncDemo}>
             {t.embed.syncToHq}
-          </button>
+          </HubButton>
         }
       />
-      <div className="flex flex-1 flex-col p-4">
+      <div className="flex flex-1 flex-col gap-3 p-3 sm:p-4">
         <OssBadge moduleId={moduleId} />
         {embedUrl ? (
           <iframe
             title={name}
             src={embedUrl}
-            className="min-h-[70vh] flex-1 rounded-xl border bg-white shadow-sm"
+            className="min-h-[60vh] flex-1 rounded-2xl border border-neutral-200 bg-white shadow-sm sm:min-h-[70vh]"
             allow="camera; microphone; clipboard-write"
           />
         ) : (
-          <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center">
-            <p className="text-sm font-medium text-neutral-700">{name}</p>
-            <p className="mt-2 max-w-md text-xs text-neutral-500">{t.embed.backendHint}</p>
-            <code className="mt-2 block rounded bg-neutral-100 p-2 text-left text-xs">
-              .\scripts\docker-oss.ps1 up -Profile {dockerProfile} -Wait -SyncEnv
-              <br />
-              {envKey ?? "URL"} in lonex-hub/.env.local
-            </code>
-            <button
-              type="button"
-              onClick={handleSyncDemo}
-              className="mt-4 rounded-lg bg-neutral-900 px-4 py-2 text-xs text-white"
-            >
+          <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white px-6 py-10 text-center">
+            <p className="text-base font-semibold text-neutral-800">{name}</p>
+            <p className="mt-2 max-w-sm text-sm text-neutral-600">{t.embed.backendHint}</p>
+            <p className="mt-4 hidden max-w-md rounded-xl bg-neutral-50 px-4 py-3 text-left text-xs text-neutral-500 md:block">
+              관리자: Docker OSS 또는 Render 배포 후 환경 변수({envKey ?? "URL"})를 설정하세요.
+            </p>
+            <HubButton className="mt-6" onClick={handleSyncDemo}>
               {t.embed.demoUpload}
-            </button>
+            </HubButton>
           </div>
         )}
       </div>

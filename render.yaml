@@ -8,17 +8,16 @@
 services:
   - type: web
     name: lonex-oss-livekit
-    runtime: image
+    runtime: docker
     plan: free
     region: singapore
-    autoDeploy: false
-    image:
-      url: docker.io/livekit/livekit-server:latest
-    dockerCommand: --dev --bind 0.0.0.0
+    repo: https://github.com/shinkang888-code/lonexeim
+    branch: master
+    rootDir: scripts/render/livekit
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /
-    envVars:
-      - key: LIVEKIT_BIND
-        value: "0.0.0.0"
+    autoDeploy: true
 
   - type: cron
     name: lonex-hub-sync-health

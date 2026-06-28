@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "name": "Lonex Hub Design System",
+    "version": "1.0.0",
+    "source": "local-figma-spec"
+  },
+  "colors": {
+    "hub-color-bg": "#eef1f6",
+    "hub-color-surface": "#ffffff",
+    "hub-color-primary": "#4f46e5",
+    "hub-color-primary-dark": "#3730a3",
+    "hub-color-accent": "#0ea5e9",
+    "hub-color-text": "#0f172a",
+    "hub-color-text-muted": "#64748b",
+    "hub-color-border": "#e2e8f0",
+    "hub-color-communication": "#2563eb",
+    "hub-color-work": "#7c3aed",
+    "hub-color-info": "#059669",
+    "hub-color-support": "#d97706",
+    "hub-color-hero-from": "#0f172a",
+    "hub-color-hero-via": "#1e1b4b",
+    "hub-color-hero-to": "#312e81"
+  },
+  "textStyles": {
+    "hub-text-display": { "fontSize": 30, "fontWeight": 700, "lineHeight": 36 },
+    "hub-text-title": { "fontSize": 14, "fontWeight": 600, "lineHeight": 20 },
+    "hub-text-body": { "fontSize": 14, "fontWeight": 400, "lineHeight": 22 },
+    "hub-text-caption": { "fontSize": 12, "fontWeight": 500, "lineHeight": 16 }
+  },
+  "gradients": {
+    "hub-gradient-hero": "linear-gradient(105deg, rgba(15,23,42,0.92) 0%, rgba(30,27,75,0.78) 48%, rgba(49,46,129,0.45) 100%)",
+    "hub-gradient-mesh": "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99,102,241,0.14), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(14,165,233,0.1), transparent)"
+  }
+}

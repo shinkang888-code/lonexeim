@@ -9,7 +9,11 @@
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "node scripts/migrate.mjs",
-    "db:seed": "node scripts/seed-all.mjs"
+    "db:seed": "node scripts/seed-all.mjs",
+    "figma:setup": "node ../scripts/figma-sync.mjs setup",
+    "figma:sync": "node ../scripts/figma-sync.mjs sync",
+    "figma:link": "node ../scripts/figma-sync.mjs link",
+    "prebuild": "node scripts/figma-prebuild.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

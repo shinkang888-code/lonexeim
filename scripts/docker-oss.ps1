@@ -10,7 +10,7 @@
   .\scripts\docker-oss.ps1 down
 #>
 param(
-    [ValidateSet("up", "down", "status", "logs", "pull", "sync-env")]
+    [ValidateSet("up", "down", "status", "logs", "pull", "sync-env", "tunnel")]
     [string]$Action = "status",
     [string]$Profile = "core",
     [switch]$Wait,
@@ -21,6 +21,8 @@ $Root = Split-Path $PSScriptRoot -Parent
 $Compose = Join-Path $PSScriptRoot "docker-compose.oss.yml"
 $EnvFile = Join-Path $PSScriptRoot "docker-oss.env"
 $SyncScript = Join-Path $PSScriptRoot "sync-docker-env.mjs"
+$TunnelScript = Join-Path $PSScriptRoot "oss-tunnel.mjs"
+$DockerVercelScript = Join-Path $PSScriptRoot "docker-vercel.ps1"
 
 function Test-DockerDaemon {
     docker info 2>$null | Out-Null
@@ -51,6 +53,7 @@ function Show-EmbedUrls {
     Get-Content $EnvFile | Select-String "^NEXT_PUBLIC_"
     Write-Host ""
     Write-Host "Sync: .\scripts\docker-oss.ps1 sync-env"
+    Write-Host "Vercel: .\scripts\docker-vercel.ps1  (tunnel + vercel env + deploy)"
 }
 
 if ($Action -ne "sync-env" -and -not (Test-DockerDaemon)) {
@@ -76,7 +79,16 @@ if ($Action -ne "sync-env" -and -not (Test-DockerDaemon)) {
 $profileArgs = @()
 foreach ($p in ($Profile -split ",")) {
     $p = $p.Trim()
-    if ($p) { $profileArgs += "--profile"; $profileArgs += $p }
+    if (-not $p) { continue }
+    if ($p -eq "all") {
+        foreach ($ap in @("all")) {
+            $profileArgs += "--profile"
+            $profileArgs += $ap
+        }
+        continue
+    }
+    $profileArgs += "--profile"
+    $profileArgs += $p
 }
 
 $base = @("compose", "-f", $Compose, "--env-file", $EnvFile) + $profileArgs
@@ -84,6 +96,10 @@ $base = @("compose", "-f", $Compose, "--env-file", $EnvFile) + $profileArgs
 switch ($Action) {
     "sync-env" {
         Invoke-SyncHubEnv
+    }
+    "tunnel" {
+        node $TunnelScript start
+        if ($LASTEXITCODE -eq 0) { Invoke-SyncHubEnv }
     }
     "pull" {
         docker @base pull
@@ -105,7 +121,7 @@ switch ($Action) {
     "status" {
         docker @base ps -a
         Write-Host ""
-        Write-Host "Profiles: core | chat | support | notes | dify | ai-assistant"
-        Write-Host "Example: .\scripts\docker-oss.ps1 up -Profile core -Wait -SyncEnv"
+        Write-Host "Profiles: all | core | chat | calendar | support | notes | dify | billing"
+        Write-Host "Example: .\scripts\docker-oss.ps1 up -Profile all -Wait -SyncEnv"
     }
 }

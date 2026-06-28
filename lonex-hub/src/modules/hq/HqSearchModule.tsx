@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ModulePageHeader, OssBadge } from "@/components/hub/ModuleChrome";
+import { HUB_DOCK_PAD, HubButton, hubInputClass, hubModuleShell, hubSelectClass } from "@/components/hub/hub-ui";
 
 interface SearchHit {
   id: string;
@@ -87,32 +88,32 @@ export default function HqSearchModule() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] pb-28">
+    <div className={`${hubModuleShell} ${HUB_DOCK_PAD}`}>
       <ModulePageHeader title="본사 통합검색" />
-      <div className="mx-auto max-w-3xl p-4">
+      <div className="mx-auto max-w-3xl space-y-4 p-3 sm:p-4">
         <OssBadge moduleId="hq-search" />
 
         {!authed && (
-          <form onSubmit={login} className="mb-4 rounded-xl border bg-white p-4">
-            <p className="mb-2 text-sm text-neutral-700">본사 관리자 Secret (httpOnly 세션)</p>
-            <div className="flex gap-2">
+          <form onSubmit={login} className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+            <p className="mb-3 text-sm font-medium text-neutral-800">본사 관리자 Secret</p>
+            <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 type="password"
-                className="flex-1 rounded-lg border px-3 py-2 text-sm"
+                className={hubInputClass}
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
                 placeholder="LONEX_HQ_ADMIN_SECRET"
               />
-              <button type="submit" className="rounded-lg bg-neutral-900 px-4 py-2 text-sm text-white">
+              <HubButton type="submit" className="w-full sm:w-auto">
                 로그인
-              </button>
+              </HubButton>
             </div>
-            {loginErr && <p className="mt-2 text-xs text-red-600">{loginErr}</p>}
+            {loginErr && <p className="mt-2 text-sm text-red-600">{loginErr}</p>}
           </form>
         )}
 
         {stats && !stats.offline && authed && (
-          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {(
               [
                 ["직원", stats.active_employees],
@@ -121,28 +122,28 @@ export default function HqSearchModule() {
                 ["보안", stats.security_events],
               ] as [string, number][]
             ).map(([label, val]) => (
-              <div key={String(label)} className="rounded-xl bg-white p-3 text-center shadow-sm">
-                <p className="text-lg font-bold">{val}</p>
-                <p className="text-xs text-neutral-500">{label}</p>
+              <div key={String(label)} className="rounded-2xl border border-neutral-200 bg-white p-4 text-center shadow-sm">
+                <p className="text-xl font-bold text-neutral-900">{val ?? 0}</p>
+                <p className="text-xs font-medium text-neutral-500">{label}</p>
               </div>
             ))}
           </div>
         )}
         {stats?.offline && (
-          <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+          <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
             Neon DATABASE_URL 미연결 — Vercel 환경변수 설정 후 본사 검색이 활성화됩니다.
           </p>
         )}
-        <form onSubmit={search} className="mb-4 flex flex-wrap gap-2">
+        <form onSubmit={search} className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <input
-            className="min-w-[200px] flex-1 rounded-xl border px-3 py-2 text-sm"
+            className={`${hubInputClass} sm:min-w-0 sm:flex-1`}
             placeholder="이메일·문서·채팅 전체 검색..."
             value={q}
             onChange={(e) => setQ(e.target.value)}
             disabled={!authed}
           />
           <select
-            className="rounded-xl border px-3 py-2 text-sm"
+            className={`${hubSelectClass} w-full sm:w-auto`}
             value={type}
             onChange={(e) => setType(e.target.value)}
             disabled={!authed}
@@ -154,26 +155,22 @@ export default function HqSearchModule() {
             <option value="media">Media</option>
             <option value="erp">ERP</option>
           </select>
-          <button
-            type="submit"
-            disabled={loading || !authed}
-            className="rounded-xl bg-neutral-900 px-4 py-2 text-sm text-white disabled:opacity-50"
-          >
+          <HubButton type="submit" disabled={loading || !authed} className="w-full sm:w-auto">
             {loading ? "검색 중…" : "검색"}
-          </button>
+          </HubButton>
         </form>
-        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
         <div className="space-y-2">
           {results.map((r) => (
-            <article key={r.id} className="rounded-xl border bg-white p-4 shadow-sm">
+            <article key={r.id} className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between gap-2">
-                <div>
+                <div className="min-w-0">
                   <p className="font-medium text-neutral-900">{r.title}</p>
                   <p className="text-xs text-neutral-500">
                     {r.employee_name} · {r.dept} · {r.data_type}
                   </p>
                 </div>
-                <span className="shrink-0 text-[10px] text-neutral-400">
+                <span className="shrink-0 text-xs text-neutral-400">
                   {String(r.ingested_at).slice(0, 16)}
                 </span>
               </div>
